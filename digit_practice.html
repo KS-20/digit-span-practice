@@ -1,0 +1,21 @@
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <script type="text/javascript" src="source.js"> </script>
+</head>
+
+<body onload="appEngine.onPageLoad()">
+    <p id="numToRemember"></p>
+
+    <form name="form1" onsubmit="appEngine.onSubmitAnswer();" class="my-form">
+        <input name=input1 type="text" value="" autofocus>
+    </form>
+
+    <form name="form2" class="my-form" onchange="appEngine.rememberNumOfDigits()">
+        <input name=numOfDigits type="text" value="7">
+    </form>
+
+</body>
+
+</html>
