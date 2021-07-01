@@ -1,12 +1,13 @@
 // for reference: https://timodenk.com/blog/digit-span-test-online-tool/
 
 class AppEngine {
-    constructor() {
+    constructor(guiController) {
         this.numToRecall = "";
+        this.guiController = guiController;
     }
 
     onSubmitAnswer() {
-        var str = this.getInputObj().value
+        var str = this.guiController.getInput();
         if (str == this.numToRecall) {
             alert("Good job! you put the correct answer: " + str);
         } else {
@@ -17,34 +18,35 @@ class AppEngine {
         return false;
     }
 
-    getInputObj() {
-        return document.forms["form1"]["input1"];
-    }
 
-    getDisplayObj() {
-        return document.getElementById("numToRemember");
-    }
 
     onPageLoad() {
         if (localStorage.numOfDigits) {
-            document.forms["form2"]["numOfDigits"].value = localStorage.numOfDigits;
+            this.guiController.setNumOfDigitsField(localStorage.numOfDigits);
         }
         this.prepareForQuestion();
     }
 
     prepareForQuestion() {
-        this.getInputObj().style.display = "none";
-        this.getDisplayObj().style.display = "block";
-
-        var numOfDigits = this.getNumOfDigits();
+        this.guiController.activateDisplayMode()
+        var numOfDigits = this.guiController.getNumOfDigits();
         this.numToRecall = "";
         for (var i = 0; i < numOfDigits; ++i) {
             this.numToRecall += Math.floor(Math.random() * 10);
         }
-        this.getDisplayObj().innerHTML = this.numToRecall;
-        this.getInputObj().style.display = "none";
+        this.guiController.setNumToRecall(this.numToRecall);
         var secondsToWait = numOfDigits * 1000;
-        setTimeout(() => this.prepareForAns(), secondsToWait);
+        setTimeout(() => this.guiController.prepareForAns(), secondsToWait);
+    }
+
+    rememberNumOfDigits() {
+        localStorage.setItem("numOfDigits", this.guiController.getNumOfDigits());
+    }
+}
+
+class HtmlPureGui {
+    getInput() {
+        return this.getInputObj().value;
     }
 
     prepareForAns() {
@@ -56,11 +58,28 @@ class AppEngine {
         return document.forms["form2"]["numOfDigits"].value
     }
 
-    rememberNumOfDigits() {
-        localStorage.setItem("numOfDigits", this.getNumOfDigits());
+    getInputObj() {
+        return document.forms["form1"]["input1"];
     }
+
+    getDisplayObj() {
+        return document.getElementById("numToRemember");
+    }
+
+    setNumOfDigitsField(numOfDigits) {
+        document.forms["form2"]["numOfDigits"].value = numOfDigits;
+    }
+    activateDisplayMode() {
+        this.getInputObj().style.display = "none";
+        this.getDisplayObj().style.display = "block";
+    }
+
+    setNumToRecall(numToRecall) {
+        this.getDisplayObj().innerHTML = numToRecall;
+    }
+
 }
 
 /* exported appEngine */
 
-var appEngine = new AppEngine(); 
+var appEngine = new AppEngine(new HtmlPureGui());
