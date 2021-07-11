@@ -6,9 +6,13 @@ class AppEngine {
         this.guiController = guiController;
     }
 
+    getGuiController() {
+        return this.guiController;
+    }
+
     onSubmitAnswer() {
         var str = this.guiController.getInput();
-        if (str == this.numToRecall) {
+        if (str === this.numToRecall) {
             alert("Good job! you put the correct answer: " + str);
         } else {
             alert("wrong!, you submitted: " + str + " but the answer is: " + this.numToRecall)
@@ -80,6 +84,48 @@ class HtmlPureGui {
 
 }
 
+class ReactGui {
+    setAppComponent(appComponent){
+        this.appComponent = appComponent;
+    }
+
+    setInput(input){
+        this.input = input;
+    }
+
+    getInput() {
+        return this.input;
+    }
+
+    prepareForAns() {
+        this.appComponent.setState( {isInputMode: true} ) 
+    }
+
+    getNumOfDigits() {
+        return 2;
+    }
+
+    getInputObj() {
+    }
+
+    getDisplayObj() {
+    }
+
+    setNumOfDigitsField(numOfDigits) {
+    }
+    activateDisplayMode() {
+    }
+
+    setNumToRecall(numToRecall) {
+        var stateToSet = {numToRecall: numToRecall, isInputMode: false};
+        this.appComponent.setState(stateToSet ) 
+        //console.log(this.appComponent.state);
+    }
+
+}
+
 /* exported appEngine */
 
-var appEngine = new AppEngine(new HtmlPureGui());
+var appEngine = new AppEngine(new ReactGui());
+
+export default appEngine;
