@@ -25,6 +25,8 @@ class AppEngine {
     onPageLoad() {
         if (localStorage.numOfDigits) {
             this.guiController.setNumOfDigitsField(localStorage.numOfDigits);
+        } else {
+            this.guiController.setNumOfDigitsField(2);
         }
         this.prepareForQuestion();
     }
