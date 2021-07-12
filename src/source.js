@@ -22,8 +22,6 @@ class AppEngine {
         return false;
     }
 
-
-
     onPageLoad() {
         if (localStorage.numOfDigits) {
             this.guiController.setNumOfDigitsField(localStorage.numOfDigits);
@@ -102,7 +100,11 @@ class ReactGui {
     }
 
     getNumOfDigits() {
-        return 2;
+        return this.numOfDigits;
+    }
+
+    setNumOfDigits(numOfDigits) {
+        this.numOfDigits = numOfDigits;
     }
 
     getInputObj() {
@@ -112,6 +114,8 @@ class ReactGui {
     }
 
     setNumOfDigitsField(numOfDigits) {
+        this.setNumOfDigits(numOfDigits);
+        this.appComponent.setState({defaultNumSize: numOfDigits})
     }
     activateDisplayMode() {
     }
