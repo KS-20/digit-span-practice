@@ -46,6 +46,10 @@ class AppEngine {
     rememberNumOfDigits() {
         localStorage.setItem("numOfDigits", this.guiController.getNumOfDigits());
     }
+
+    switchToPureHtmlGui(){
+        this.guiController = new HtmlPureGui();
+    }
 }
 
 class HtmlPureGui {
@@ -129,8 +133,6 @@ class ReactGui {
     }
 
 }
-
-/* exported appEngine */
 
 var appEngine = new AppEngine(new ReactGui());
 

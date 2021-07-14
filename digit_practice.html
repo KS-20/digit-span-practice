@@ -2,7 +2,11 @@
 
 <head>
     <meta charset="UTF-8">
-    <script type="text/javascript" src="source.js"> </script>
+    <script type="module" >
+        import appEngine from "./src/source.js";
+        appEngine.switchToPureHtmlGui();
+        window.appEngine = appEngine;
+    </script>
 </head>
 
 <body onload="appEngine.onPageLoad()">
