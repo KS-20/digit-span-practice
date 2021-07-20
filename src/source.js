@@ -10,6 +10,11 @@ class AppEngine {
         return this.guiController;
     }
 
+    startPracticeSet() {
+        this.currentRepIndex = 0;
+        this.prepareForQuestion();
+    }
+
     onSubmitAnswer() {
         var str = this.guiController.getInput();
         if (str === this.numToRecall) {
@@ -17,8 +22,11 @@ class AppEngine {
         } else {
             alert("wrong!, you submitted: " + str + " but the answer is: " + this.numToRecall)
         }
+        this.currentRepIndex++;
+        if (this.currentRepIndex < this.guiController.getNumOfReps()) {
+            this.prepareForQuestion();
+        }
 
-        this.prepareForQuestion()
         return false;
     }
 
@@ -28,7 +36,14 @@ class AppEngine {
         } else {
             this.guiController.setNumOfDigitsField(2);
         }
-        this.prepareForQuestion();
+
+        if(localStorage.numOfReps) {
+            this.guiController.setNumOfRepsField(localStorage.numOfReps)
+        } else {
+            this.guiController.setNumOfRepsField(2);
+        }
+
+        this.startPracticeSet();
     }
 
     prepareForQuestion() {
@@ -47,7 +62,12 @@ class AppEngine {
         localStorage.setItem("numOfDigits", this.guiController.getNumOfDigits());
     }
 
-    switchToPureHtmlGui(){
+    rememberNumOfReps() {
+        localStorage.setItem("numOfReps", this.guiController.getNumOfReps());
+    }
+
+
+    switchToPureHtmlGui() {
         this.guiController = new HtmlPureGui();
     }
 }
@@ -89,11 +109,11 @@ class HtmlPureGui {
 }
 
 class ReactGui {
-    setAppComponent(appComponent){
+    setAppComponent(appComponent) {
         this.appComponent = appComponent;
     }
 
-    setInput(input){
+    setInput(input) {
         this.input = input;
     }
 
@@ -102,7 +122,7 @@ class ReactGui {
     }
 
     prepareForAns() {
-        this.appComponent.setState( {isInputMode: true} ) 
+        this.appComponent.setState({ isInputMode: true })
     }
 
     getNumOfDigits() {
@@ -113,6 +133,15 @@ class ReactGui {
         this.numOfDigits = numOfDigits;
     }
 
+    getNumOfReps(numOfReps) {
+        return this.numOfReps;
+    }
+
+
+    setNumOfReps(numOfReps) {
+        this.numOfReps = numOfReps;
+    }
+
     getInputObj() {
     }
 
@@ -121,14 +150,21 @@ class ReactGui {
 
     setNumOfDigitsField(numOfDigits) {
         this.setNumOfDigits(numOfDigits);
-        this.appComponent.setState({defaultNumSize: numOfDigits})
+        this.appComponent.setState({ defaultNumSize: numOfDigits })
     }
+
+    setNumOfRepsField(numOfReps) {
+        this.setNumOfReps(numOfReps);
+        this.appComponent.setState({ defaultRepNum: numOfReps })
+    }
+
+
     activateDisplayMode() {
     }
 
     setNumToRecall(numToRecall) {
-        var stateToSet = {numToRecall: numToRecall, isInputMode: false};
-        this.appComponent.setState(stateToSet ) 
+        var stateToSet = { numToRecall: numToRecall, isInputMode: false };
+        this.appComponent.setState(stateToSet)
         //console.log(this.appComponent.state);
     }
 

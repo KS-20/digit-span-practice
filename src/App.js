@@ -4,7 +4,6 @@ class InputForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {value: ''};
-    // this.onSubmit = this.onSubmit.bind(this);
   }
 
   handleChange = (event)=> {
@@ -56,6 +55,12 @@ class App extends React.Component {
     appEngine.rememberNumOfDigits();
   }
 
+  setNumOfReps = (numOfReps) => {
+    var appEngine = this.props.appEngine;
+    appEngine.getGuiController().setNumOfReps(numOfReps);
+    appEngine.rememberNumOfReps();
+  }
+
   render() {
     var mainDisplay;
     if (this.state.isInputMode) {
@@ -66,7 +71,11 @@ class App extends React.Component {
     return (
       <>
         {mainDisplay}
+        <p>length of number:</p>
         <InputForm onChange={this.setNumLength} defaultValue={this.state.defaultNumSize} />
+        <p>Number of reps:</p>
+        <InputForm onChange={this.setNumOfReps} defaultValue={this.state.defaultRepNum} />
+
       </>
     );
   }
