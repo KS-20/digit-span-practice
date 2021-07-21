@@ -49,15 +49,20 @@ class App extends React.Component {
     appEngine.onSubmitAnswer();
   }
 
-  setNumLength = (length) => {
-    var appEngine = this.props.appEngine;
-    appEngine.getGuiController().setNumOfDigits(length);
-    appEngine.rememberNumOfDigits();
+  setNumLengthField = (length) => {
+    this.numLength = length;
   }
 
-  setNumOfReps = (numOfReps) => {
+  setNumOfRepsField = (numOfReps) => {
+    this.numOfReps = numOfReps
+  }
+
+  saveSettings = () => {
     var appEngine = this.props.appEngine;
-    appEngine.getGuiController().setNumOfReps(numOfReps);
+    appEngine.getGuiController().setNumOfDigits(this.numLength);
+    appEngine.rememberNumOfDigits();
+
+    appEngine.getGuiController().setNumOfReps(this.numOfReps);
     appEngine.rememberNumOfReps();
   }
 
@@ -72,10 +77,11 @@ class App extends React.Component {
       <>
         {mainDisplay}
         <p>length of number:</p>
-        <InputForm onChange={this.setNumLength} defaultValue={this.state.defaultNumSize} />
+        <InputForm onChange={this.setNumLengthField} defaultValue={this.state.defaultNumSize} />
         <p>Number of reps:</p>
-        <InputForm onChange={this.setNumOfReps} defaultValue={this.state.defaultRepNum} />
+        <InputForm onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
 
+        <button type="button" onClick={ this.saveSettings }>Save Settings</button>
       </>
     );
   }
