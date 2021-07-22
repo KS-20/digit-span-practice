@@ -76,6 +76,7 @@ class App extends React.Component {
     return (
       <>
         {mainDisplay}
+        <button type="button" autoFocus onClick={ ()=> this.props.appEngine.startPracticeSet() }>start practice </button>
         <p>length of number:</p>
         <InputForm onChange={this.setNumLengthField} defaultValue={this.state.defaultNumSize} />
         <p>Number of reps:</p>

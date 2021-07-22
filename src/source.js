@@ -43,7 +43,6 @@ class AppEngine {
             this.guiController.setNumOfRepsField(2);
         }
 
-        this.startPracticeSet();
     }
 
     prepareForQuestion() {
