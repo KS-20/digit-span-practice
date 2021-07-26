@@ -1,5 +1,32 @@
 // for reference: https://timodenk.com/blog/digit-span-test-online-tool/
 
+class SetRecord {
+    constructor(){
+        this.setRecordArray=[];
+    }
+    addScore(score) {
+        this.setRecordArray.push(score);
+    }
+
+    setMinSuccessScore (minSuccessScore) {
+        this.minSuccessScore = minSuccessScore;
+    }
+
+    getNumOfExercises () {
+        return this.setRecordArray.length;
+    }
+
+    getNumOfSuccessfulExercises () {
+        var numOfSuccessfulExercises = 0;
+        for (let score of this.setRecordArray) {
+            if(this.minSuccessScore <= score) {
+                numOfSuccessfulExercises++;
+            }
+        }
+        return numOfSuccessfulExercises;
+    }
+}
+
 class AppEngine {
     constructor(guiController) {
         this.numToRecall = "";
@@ -12,6 +39,7 @@ class AppEngine {
 
     startPracticeSet() {
         this.currentRepIndex = 0;
+        this.currentSetRecord = new SetRecord();
         this.prepareForQuestion();
     }
 
@@ -19,12 +47,19 @@ class AppEngine {
         var str = this.guiController.getInput();
         if (str === this.numToRecall) {
             alert("Good job! you put the correct answer: " + str);
+            const numOfDigits = this.guiController.getNumOfDigits();
+            this.currentSetRecord.addScore( numOfDigits )
         } else {
-            alert("wrong!, you submitted: " + str + " but the answer is: " + this.numToRecall)
+            alert("wrong!, you submitted: " + str + " but the answer is: " + this.numToRecall);
+            this.currentSetRecord.addScore( 0 )
         }
         this.currentRepIndex++;
         if (this.currentRepIndex < this.guiController.getNumOfReps()) {
             this.prepareForQuestion();
+        } else {
+            var msg = "succeeded in  "+this.currentSetRecord.getNumOfSuccessfulExercises()+" out of "+
+            this.currentSetRecord.getNumOfExercises();
+            this.guiController.setNumToRecall(msg);
         }
 
         return false;
@@ -164,9 +199,7 @@ class ReactGui {
     setNumToRecall(numToRecall) {
         var stateToSet = { numToRecall: numToRecall, isInputMode: false };
         this.appComponent.setState(stateToSet)
-        //console.log(this.appComponent.state);
     }
-
 }
 
 var appEngine = new AppEngine(new ReactGui());
