@@ -55,19 +55,19 @@ class App extends React.Component {
   }
 
   setNumLengthField = (length) => {
-    this.numLength = length;
+    this.numLengthField = length;
   }
 
   setNumOfRepsField = (numOfReps) => {
-    this.numOfReps = numOfReps
+    this.numOfRepsField = numOfReps
   }
 
   saveSettings = () => {
     var appEngine = this.props.appEngine;
-    appEngine.getGuiController().setNumOfDigits(this.numLength);
+    appEngine.getGuiController().setNumOfDigits(this.numLengthField);
     appEngine.rememberNumOfDigits();
 
-    appEngine.getGuiController().setNumOfReps(this.numOfReps);
+    appEngine.getGuiController().setNumOfReps(this.numOfRepsField);
     appEngine.rememberNumOfReps();
   }
 

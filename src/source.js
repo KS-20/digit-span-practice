@@ -40,6 +40,7 @@ class AppEngine {
     startPracticeSet() {
         this.currentRepIndex = 0;
         this.currentSetRecord = new SetRecord();
+        this.currentSetRecord.setMinSuccessScore(this.guiController.getNumOfDigits());
         this.prepareForQuestion();
     }
 
@@ -67,15 +68,15 @@ class AppEngine {
 
     onPageLoad() {
         if (localStorage.numOfDigits) {
-            this.guiController.setNumOfDigitsField(localStorage.numOfDigits);
+            this.guiController.initNumOfDigits(localStorage.numOfDigits);
         } else {
-            this.guiController.setNumOfDigitsField(2);
+            this.guiController.initNumOfDigits(2);
         }
 
         if(localStorage.numOfReps) {
-            this.guiController.setNumOfRepsField(localStorage.numOfReps)
+            this.guiController.initNumOfReps(localStorage.numOfReps)
         } else {
-            this.guiController.setNumOfRepsField(2);
+            this.guiController.initNumOfReps(2);
         }
 
     }
@@ -182,14 +183,17 @@ class ReactGui {
     getDisplayObj() {
     }
 
-    setNumOfDigitsField(numOfDigits) {
+    initNumOfDigits(numOfDigits) {
         this.setNumOfDigits(numOfDigits);
         this.appComponent.setState({ defaultNumSize: numOfDigits })
+        this.appComponent.setNumLengthField(numOfDigits);
     }
 
-    setNumOfRepsField(numOfReps) {
+    initNumOfReps(numOfReps) {
         this.setNumOfReps(numOfReps);
         this.appComponent.setState({ defaultRepNum: numOfReps })
+        this.appComponent.setNumOfRepsField(numOfReps);
+
     }
 
 
