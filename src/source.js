@@ -61,6 +61,7 @@ class AppEngine {
             var msg = "succeeded in  "+this.currentSetRecord.getNumOfSuccessfulExercises()+" out of "+
             this.currentSetRecord.getNumOfExercises();
             this.guiController.setNumToRecall(msg);
+            this.guiController.focusStartButton();
         }
 
         return false;
@@ -196,13 +197,16 @@ class ReactGui {
 
     }
 
-
     activateDisplayMode() {
     }
 
     setNumToRecall(numToRecall) {
         var stateToSet = { numToRecall: numToRecall, isInputMode: false };
         this.appComponent.setState(stateToSet)
+    }
+
+    focusStartButton() {
+        this.appComponent.focusStartButton();
     }
 }
 

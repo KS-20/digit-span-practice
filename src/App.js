@@ -42,6 +42,11 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = { numToRecall: '12345', isInputMode: true };
+    this.startButton = React.createRef();
+  }
+
+  focusStartButton = () => {
+    this.startButton.current.focus();
   }
 
   componentDidMount() {
@@ -81,7 +86,9 @@ class App extends React.Component {
     return (
       <>
         {mainDisplay}
-        <button type="button" autoFocus onClick={() => this.props.appEngine.startPracticeSet()}>start practice </button>
+        <button type="button" autoFocus onClick={() => this.props.appEngine.startPracticeSet() }
+        ref={this.startButton}>
+          start practice </button>
         <p>length of number:</p>
         <InputForm onChange={this.setNumLengthField} defaultValue={this.state.defaultNumSize} />
         <p>Number of reps:</p>
