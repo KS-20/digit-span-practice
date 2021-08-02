@@ -43,6 +43,7 @@ class App extends React.Component {
     super(props);
     this.state = { numToRecall: '12345', isInputMode: true };
     this.startButton = React.createRef();
+    this.saveSettingButton = React.createRef();
   }
 
   focusStartButton = () => {
@@ -61,10 +62,24 @@ class App extends React.Component {
 
   setNumLengthField = (length) => {
     this.numLengthField = length;
+    this.AdjustDisableStatus();
   }
 
   setNumOfRepsField = (numOfReps) => {
-    this.numOfRepsField = numOfReps
+    this.numOfRepsField = numOfReps;
+    this.AdjustDisableStatus();
+  }
+
+  AdjustDisableStatus = () => {
+    var appEngine = this.props.appEngine;
+    var shouldDisable = appEngine.getGuiController().getNumOfDigits() === this.numLengthField && 
+    appEngine.getGuiController().getNumOfReps() === this.numOfRepsField;
+    if(shouldDisable) {
+      this.saveSettingButton.current.disabled = true;
+    } else {
+      this.saveSettingButton.current.disabled = false;
+    }
+
   }
 
   saveSettings = () => {
@@ -74,6 +89,7 @@ class App extends React.Component {
 
     appEngine.getGuiController().setNumOfReps(this.numOfRepsField);
     appEngine.rememberNumOfReps();
+    this.AdjustDisableStatus();
   }
 
   render() {
@@ -94,7 +110,7 @@ class App extends React.Component {
         <p>Number of reps:</p>
         <InputForm onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
 
-        <button type="button" onClick={this.saveSettings}>Save Settings</button>
+        <button type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
       </>
     );
   }

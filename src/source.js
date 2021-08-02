@@ -173,7 +173,6 @@ class ReactGui {
         return this.numOfReps;
     }
 
-
     setNumOfReps(numOfReps) {
         this.numOfReps = numOfReps;
     }
