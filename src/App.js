@@ -1,4 +1,5 @@
 import React from 'react';
+import ScoreChart from './scoreChart.js'
 
 class InputForm extends React.Component {
   constructor(props) {
@@ -72,9 +73,9 @@ class App extends React.Component {
 
   AdjustDisableStatus = () => {
     var appEngine = this.props.appEngine;
-    var shouldDisable = appEngine.getGuiController().getNumOfDigits() === this.numLengthField && 
-    appEngine.getGuiController().getNumOfReps() === this.numOfRepsField;
-    if(shouldDisable) {
+    var shouldDisable = appEngine.getGuiController().getNumOfDigits() === this.numLengthField &&
+      appEngine.getGuiController().getNumOfReps() === this.numOfRepsField;
+    if (shouldDisable) {
       this.saveSettingButton.current.disabled = true;
     } else {
       this.saveSettingButton.current.disabled = false;
@@ -102,8 +103,8 @@ class App extends React.Component {
     return (
       <>
         {mainDisplay}
-        <button type="button" autoFocus onClick={() => this.props.appEngine.startPracticeSet() }
-        ref={this.startButton}>
+        <button type="button" autoFocus onClick={() => this.props.appEngine.startPracticeSet()}
+          ref={this.startButton}>
           start practice </button>
         <p>length of number:</p>
         <InputForm onChange={this.setNumLengthField} defaultValue={this.state.defaultNumSize} />
@@ -111,6 +112,7 @@ class App extends React.Component {
         <InputForm onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
 
         <button type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
+        <ScoreChart performenceRecord={this.props.appEngine.getPerformanceRecord()}/>
       </>
     );
   }

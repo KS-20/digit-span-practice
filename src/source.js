@@ -25,12 +25,37 @@ class SetRecord {
         }
         return numOfSuccessfulExercises;
     }
+
+    getSuccessRate () {
+        return  Math.round(this.getNumOfSuccessfulExercises()/this.getNumOfExercises()*100);
+    }
+}
+
+class PerformanceRecord {
+    constructor(){
+        this.perfRecordArray=[];
+    }
+
+    addSetRecord(setRecord) {
+        this.perfRecordArray.push(setRecord);
+    }
+
+    *[Symbol.iterator]() {
+        for(var setRecord of this.perfRecordArray) {
+          yield setRecord;
+        }
+    }
 }
 
 class AppEngine {
     constructor(guiController) {
         this.numToRecall = "";
         this.guiController = guiController;
+        this.performanceRecord = new PerformanceRecord();
+    }
+
+    getPerformanceRecord() {
+        return this.performanceRecord;
     }
 
     getGuiController() {
@@ -58,6 +83,7 @@ class AppEngine {
         if (this.currentRepIndex < this.guiController.getNumOfReps()) {
             this.prepareForQuestion();
         } else {
+            this.performanceRecord.addSetRecord(this.currentSetRecord);
             var msg = "succeeded in  "+this.currentSetRecord.getNumOfSuccessfulExercises()+" out of "+
             this.currentSetRecord.getNumOfExercises();
             this.guiController.setNumToRecall(msg);
