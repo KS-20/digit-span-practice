@@ -1,5 +1,6 @@
 import React from 'react';
 import ScoreChart from './scoreChart.js'
+import './mystyle.css'
 
 class InputForm extends React.Component {
   constructor(props) {
@@ -102,6 +103,7 @@ class App extends React.Component {
     }
     return (
       <>
+      <div id="mainTerminal">
         {mainDisplay}
         <button type="button" autoFocus onClick={() => this.props.appEngine.startPracticeSet()}
           ref={this.startButton}>
@@ -110,9 +112,11 @@ class App extends React.Component {
         <InputForm onChange={this.setNumLengthField} defaultValue={this.state.defaultNumSize} />
         <p>Number of reps:</p>
         <InputForm onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
-
         <button type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
+      </div>
+      <div id="scoreChart">
         <ScoreChart performenceRecord={this.props.appEngine.getPerformanceRecord()}/>
+        </div>
       </>
     );
   }

@@ -1,0 +1,9 @@
+#mainTerminal {
+    float: left;
+    background-color: "green";
+}
+
+#scoreChart {
+    float: right;
+    margin-right: 20%;
+}
