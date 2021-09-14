@@ -1,6 +1,7 @@
 import React from 'react';
 import ScoreChart from './scoreChart.js'
 import './mystyle.css'
+const { createClient } = require("webdav");
 
 class InputForm extends React.Component {
   constructor(props) {
@@ -26,8 +27,8 @@ class InputForm extends React.Component {
 
   render() {
     return (
-      <form name={"form1"} onSubmit={this.onSubmit} >
-        <input name={"input1"} type={"text"} onChange={this.handleChange}
+      <form name={"form"+this.props.nameSuffix} onSubmit={this.onSubmit} >
+        <input name={"input"+this.props.nameSuffix} type={"text"} onChange={this.handleChange}
           defaultValue={this.props.defaultValue} ref={(input) => { this.nameInput = input; }} />
       </form>
     );
@@ -38,6 +39,7 @@ InputForm.defaultProps = {
   onSubmit: () => { },
   onChange: () => { },
   defaultValue: "",
+  nameSuffix: "",
 }
 
 class App extends React.Component {
@@ -97,22 +99,22 @@ class App extends React.Component {
   render() {
     var mainDisplay;
     if (this.state.isInputMode) {
-      mainDisplay = <InputForm focusOnStart onSubmit={this.checkAnswer} />;
+      mainDisplay = <InputForm nameSuffix="11" focusOnStart onSubmit={this.checkAnswer} />;
     } else {
-      mainDisplay = <p>{this.state.numToRecall}</p>;
+      mainDisplay = <p id="numConsole">{this.state.numToRecall}</p>;
     }
     return (
       <>
       <div id="mainTerminal">
         {mainDisplay}
-        <button type="button" autoFocus onClick={() => this.props.appEngine.startPracticeSet()}
+        <button id="startPractice" type="button" autoFocus onClick={() => this.props.appEngine.startPracticeSet()}
           ref={this.startButton}>
           start practice </button>
         <p>length of number:</p>
-        <InputForm onChange={this.setNumLengthField} defaultValue={this.state.defaultNumSize} />
+        <InputForm nameSuffix="_NumLen" onChange={this.setNumLengthField} defaultValue={this.state.defaultNumSize} />
         <p>Number of reps:</p>
-        <InputForm onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
-        <button type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
+        <InputForm nameSuffix="_RepCount" onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
+        <button id="saveSettings" type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
       </div>
       <div id="scoreChart">
         <ScoreChart performenceRecord={this.props.appEngine.getPerformanceRecord()}/>
