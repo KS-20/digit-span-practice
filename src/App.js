@@ -99,7 +99,7 @@ class App extends React.Component {
   render() {
     var mainDisplay;
     if (this.state.isInputMode) {
-      mainDisplay = <InputForm nameSuffix="11" focusOnStart onSubmit={this.checkAnswer} />;
+      mainDisplay = <InputForm nameSuffix="_Digits" focusOnStart onSubmit={this.checkAnswer} />;
     } else {
       mainDisplay = <p id="numConsole">{this.state.numToRecall}</p>;
     }
