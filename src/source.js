@@ -1,4 +1,5 @@
 // for reference: https://timodenk.com/blog/digit-span-test-online-tool/
+const { createClient } = require("webdav");
 
 class SetRecord {
     constructor(){
@@ -45,6 +46,10 @@ class PerformanceRecord {
           yield setRecord;
         }
     }
+
+    initDataFromJsonStr(dataString){
+        const parsedObject = JSON.parse(dataString);
+    }    
 }
 
 class AppEngine {
@@ -88,6 +93,7 @@ class AppEngine {
             this.currentSetRecord.getNumOfExercises();
             this.guiController.setNumToRecall(msg);
             this.guiController.focusStartButton();
+            this.uploadDataToWebDav();
         }
 
         return false;
@@ -104,6 +110,18 @@ class AppEngine {
             this.guiController.initNumOfReps(localStorage.numOfReps)
         } else {
             this.guiController.initNumOfReps(2);
+        }
+
+        if(localStorage.webDavUrl) {
+            this.guiController.initWebDavUrl(localStorage.webDavUrl)
+        }
+
+        if(localStorage.webDavUserName) {
+            this.guiController.initWebDavUserName(localStorage.webDavUserName)
+        }
+
+        if(localStorage.webDavPassword) {
+            this.guiController.initWebDavPassword(localStorage.webDavPassword)
         }
 
     }
@@ -128,10 +146,74 @@ class AppEngine {
         localStorage.setItem("numOfReps", this.guiController.getNumOfReps());
     }
 
+    rememberWebDavUrl() {
+        localStorage.setItem("webDavUrl",this.guiController.getWebDavUrl());
+    }
+
+    rememberWebDavUserName() {
+        localStorage.setItem("webDavUserName",this.guiController.getWebDavUserName());
+    }
+
+    rememberWebDavPassword(){
+        localStorage.setItem("webDavPassword",this.guiController.getWebDavPassword());
+    }
+
 
     switchToPureHtmlGui() {
         this.guiController = new HtmlPureGui();
     }
+
+    async setUpWebDav() {
+        const guiController = this.getGuiController();
+        const webDavUrl = guiController.getWebDavUrl();
+        const webDavUserName = guiController.getWebDavUserName();
+        const webDavPassword = guiController.getWebDavPassword();
+        // const client = createClient(
+        //     webDavUrl,
+        //     {
+        //         username: webDavUserName,
+        //         password: webDavPassword
+        //     }
+        // );
+
+        const client = createClient(
+            'webdav://webdav.4shared.com/',
+            {
+                username: "voyigi7394@proxiesblog.com",
+                password: "7XTYtdJYQvNn"
+            }
+        );
+    
+    
+        console.log("1: "+ webDavUrl+" "+webDavUserName+" "+webDavPassword);
+        console.log(client);
+        var dirExists = await client.exists("/digit_span_checker_data");
+        console.log("finished call to dir exists")
+        if (dirExists){
+            var dataExists = await client.exists("/digit_span_checker_data/data.json")
+            if (dataExists) {
+                var dataString = await client.getFileContents("/digit_span_checker_data/data.json", { format: "text" });
+                this.performanceRecord.initDataFromJsonStr(dataString);
+            }
+
+        } else {
+            await client.createDirectory("/digit_span_checker_data");
+        }
+    }
+
+    async uploadDataToWebDav(){
+        const guiController = this.getGuiController();
+        const client = createClient(
+            guiController.getWebDavUrl(),
+            {
+                username: guiController.getWebDavUserName(),
+                password: guiController.getWebDavPassword()
+            }
+        );
+        const JsonDataStr = JSON.stringify(this.performanceRecord);
+        await client.putFileContents("/digit_span_checker_data/data.json", JsonDataStr);
+    }
+
 }
 
 class HtmlPureGui {
@@ -195,12 +277,36 @@ class ReactGui {
         this.numOfDigits = numOfDigits;
     }
 
-    getNumOfReps(numOfReps) {
+    getNumOfReps() {
         return this.numOfReps;
     }
 
     setNumOfReps(numOfReps) {
         this.numOfReps = numOfReps;
+    }
+
+    getWebDavUrl(){
+        return this.webDavUrl;
+    }
+
+    setWebDavUrl(webDavUrl) {
+        this.webDavUrl = webDavUrl;
+    }
+
+    getWebDavUserName(){
+        return this.webDavUserName;
+    }
+
+    setWebDavUserName(webDavUserName){
+        this.webDavUserName = webDavUserName;
+    }
+
+    getWebDavPassword(){
+        return this.webDavPassword;
+    }
+
+    setWebDavPassword(webDavPassword) {
+        this.webDavPassword = webDavPassword
     }
 
     getInputObj() {
@@ -220,6 +326,24 @@ class ReactGui {
         this.appComponent.setState({ defaultRepNum: numOfReps })
         this.appComponent.setNumOfRepsField(numOfReps);
 
+    }
+
+    initWebDavUrl (webDavUrl) {
+        this.setWebDavUrl(webDavUrl);
+        this.appComponent.setState({defaultWebDavUrl: webDavUrl})
+        this.appComponent.setWebDavUrl(webDavUrl);
+    }
+
+    initWebDavUserName (webDavUserName) {
+        this.setWebDavUserName(webDavUserName);
+        this.appComponent.setState({defaultWebDavUserName: webDavUserName})
+        this.appComponent.setWebDavUserName(webDavUserName);
+    }
+
+    initWebDavPassword (webDavPassword) {
+        this.setWebDavPassword(webDavPassword);
+        this.appComponent.setState({defaultWebDavPassword: webDavPassword})
+        this.appComponent.setWebDavPassword(webDavPassword);
     }
 
     activateDisplayMode() {
