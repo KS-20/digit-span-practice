@@ -1,39 +1,40 @@
 // for reference: https://timodenk.com/blog/digit-span-test-online-tool/
+const Dropbox = require("dropbox")
 
 class SetRecord {
-    constructor(){
-        this.setRecordArray=[];
+    constructor() {
+        this.setRecordArray = [];
     }
     addScore(score) {
         this.setRecordArray.push(score);
     }
 
-    setMinSuccessScore (minSuccessScore) {
+    setMinSuccessScore(minSuccessScore) {
         this.minSuccessScore = minSuccessScore;
     }
 
-    getNumOfExercises () {
+    getNumOfExercises() {
         return this.setRecordArray.length;
     }
 
-    getNumOfSuccessfulExercises () {
+    getNumOfSuccessfulExercises() {
         var numOfSuccessfulExercises = 0;
         for (let score of this.setRecordArray) {
-            if(this.minSuccessScore <= score) {
+            if (this.minSuccessScore <= score) {
                 numOfSuccessfulExercises++;
             }
         }
         return numOfSuccessfulExercises;
     }
 
-    getSuccessRate () {
-        return  Math.round(this.getNumOfSuccessfulExercises()/this.getNumOfExercises()*100);
+    getSuccessRate() {
+        return Math.round(this.getNumOfSuccessfulExercises() / this.getNumOfExercises() * 100);
     }
 }
 
 class PerformanceRecord {
-    constructor(){
-        this.perfRecordArray=[];
+    constructor() {
+        this.perfRecordArray = [];
     }
 
     addSetRecord(setRecord) {
@@ -41,8 +42,21 @@ class PerformanceRecord {
     }
 
     *[Symbol.iterator]() {
-        for(var setRecord of this.perfRecordArray) {
-          yield setRecord;
+        for (var setRecord of this.perfRecordArray) {
+            yield setRecord;
+        }
+    }
+
+    populateFromJson(jsonString) {
+        var untypedObject = JSON.parse(jsonString);
+        this.perfRecordArray = [];
+        for (const unTypedSetRecord of untypedObject.perfRecordArray) {
+            let setRecord = new SetRecord();
+            setRecord.setMinSuccessScore(unTypedSetRecord.minSuccessScore);
+            for (let score of unTypedSetRecord.setRecordArray) {
+                setRecord.addScore(score);
+            }
+            this.addSetRecord(setRecord)
         }
     }
 }
@@ -52,6 +66,11 @@ class AppEngine {
         this.numToRecall = "";
         this.guiController = guiController;
         this.performanceRecord = new PerformanceRecord();
+        this.dropboxStorage = new DropboxStorage();
+    }
+
+    getDropboxStorage() {
+        return this.dropboxStorage;
     }
 
     getPerformanceRecord() {
@@ -69,41 +88,47 @@ class AppEngine {
         this.prepareForQuestion();
     }
 
-    onSubmitAnswer() {
+    async onSubmitAnswer() {
+
         var str = this.guiController.getInput();
         if (str === this.numToRecall) {
             alert("Good job! you put the correct answer: " + str);
             const numOfDigits = this.guiController.getNumOfDigits();
-            this.currentSetRecord.addScore( numOfDigits )
+            this.currentSetRecord.addScore(numOfDigits)
         } else {
             alert("wrong!, you submitted: " + str + " but the answer is: " + this.numToRecall);
-            this.currentSetRecord.addScore( 0 )
+            this.currentSetRecord.addScore(0)
         }
         this.currentRepIndex++;
         if (this.currentRepIndex < this.guiController.getNumOfReps()) {
             this.prepareForQuestion();
         } else {
             this.performanceRecord.addSetRecord(this.currentSetRecord);
-            var msg = "succeeded in  "+this.currentSetRecord.getNumOfSuccessfulExercises()+" out of "+
-            this.currentSetRecord.getNumOfExercises();
+            var msg = "succeeded in  " + this.currentSetRecord.getNumOfSuccessfulExercises() + " out of " +
+                this.currentSetRecord.getNumOfExercises();
             this.guiController.setNumToRecall(msg);
             this.guiController.focusStartButton();
+            await this.dropboxStorage.savePerfRecord(this.getPerformanceRecord());
         }
 
         return false;
     }
 
-    onPageLoad() {
+    async onPageLoad() {
         if (localStorage.numOfDigits) {
             this.guiController.initNumOfDigits(localStorage.numOfDigits);
         } else {
             this.guiController.initNumOfDigits(2);
         }
 
-        if(localStorage.numOfReps) {
+        if (localStorage.numOfReps) {
             this.guiController.initNumOfReps(localStorage.numOfReps)
         } else {
             this.guiController.initNumOfReps(2);
+        }
+        const perfRecord = await this.getDropboxStorage().loadPerfRecord();;
+        if (perfRecord) {
+            this.performanceRecord = perfRecord;
         }
 
     }
@@ -128,9 +153,82 @@ class AppEngine {
         localStorage.setItem("numOfReps", this.guiController.getNumOfReps());
     }
 
-
     switchToPureHtmlGui() {
         this.guiController = new HtmlPureGui();
+    }
+}
+
+class DropboxStorage {
+    constructor() {
+        this.redirectUri = '';
+        var CLIENT_ID = 'y9rc6q1jk1bg8lx';
+        this.dbxAuth = new Dropbox.DropboxAuth({
+            clientId: CLIENT_ID,
+        });
+    }
+
+    doAuthentication() {
+        return this.dbxAuth.getAuthenticationUrl(this.redirectUri, undefined, 'code', 'offline', undefined, undefined, true)
+            .then(authUrl => {
+                window.localStorage.clear();
+                window.localStorage.setItem("codeVerifier", this.dbxAuth.codeVerifier);
+                window.open(authUrl);
+            })
+            .catch((error) => this.reportError(error));
+    }
+    generateAccessToken(accessCode) {
+        this.dbxAuth.setCodeVerifier(window.localStorage.getItem('codeVerifier'));
+        this.dbxAuth.getAccessTokenFromCode(this.redirectUri, accessCode)
+            .then((response) => {
+                const accessToken = response.result.access_token;
+                window.localStorage.setItem("accessToken", accessToken);
+                this.dbxAuth.setAccessToken(accessToken);
+                this.dbx = new Dropbox.Dropbox({
+                    auth: this.dbxAuth
+                });
+            })
+            .catch((error) => {
+                this.reportError(error)
+            });
+    }
+
+    async loadPerfRecord() {
+        var args = {
+            path: "/digit_span_perf_record.json",
+        }
+        const codeVerifier = window.localStorage.getItem('codeVerifier');
+        const accessToken = window.localStorage.getItem("accessToken");
+        if (accessToken === null) {
+            return;
+        }
+        this.dbxAuth.setCodeVerifier(codeVerifier);
+        this.dbxAuth.setAccessToken(accessToken);
+        this.dbx = new Dropbox.Dropbox({
+            auth: this.dbxAuth
+        });
+        var ans = await this.dbx.filesDownload(args);
+        var jsonString = await ans.result.fileBlob.text();
+        var performanceRecord = new PerformanceRecord();
+        performanceRecord.populateFromJson(jsonString);
+        return performanceRecord;
+    }
+
+    async savePerfRecord(performanceRecord) {
+        var fileContent = JSON.stringify(performanceRecord);
+        var args = {
+            contents: fileContent,
+            path: "/digit_span_perf_record.json",
+            mode: { ".tag": "overwrite" },
+            autorename: true,
+            mute: true,
+            strict_conflict: false,
+        }
+        await this.dbx.filesUpload(args);
+    }
+
+    reportError(responseError) {
+        console.error(responseError)
+        console.error(responseError.error)
     }
 }
 
