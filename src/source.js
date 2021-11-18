@@ -181,8 +181,11 @@ class DropboxStorage {
         this.dbxAuth.getAccessTokenFromCode(this.redirectUri, accessCode)
             .then((response) => {
                 const accessToken = response.result.access_token;
+                const refreshToken = response.result.refresh_token;
                 window.localStorage.setItem("accessToken", accessToken);
+                window.localStorage.setItem("refreshToken",refreshToken);
                 this.dbxAuth.setAccessToken(accessToken);
+                this.dbxAuth.setRefreshToken(refreshToken);
                 this.dbx = new Dropbox.Dropbox({
                     auth: this.dbxAuth
                 });
@@ -198,11 +201,13 @@ class DropboxStorage {
         }
         const codeVerifier = window.localStorage.getItem('codeVerifier');
         const accessToken = window.localStorage.getItem("accessToken");
+        const refreshToken = window.localStorage.getItem("refreshToken");
         if (accessToken === null) {
             return;
         }
         this.dbxAuth.setCodeVerifier(codeVerifier);
         this.dbxAuth.setAccessToken(accessToken);
+        this.dbxAuth.setRefreshToken(refreshToken);
         this.dbx = new Dropbox.Dropbox({
             auth: this.dbxAuth
         });
