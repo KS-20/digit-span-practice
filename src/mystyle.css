@@ -1,6 +1,7 @@
 #mainTerminal {
     float: left;
     background-color: "green";
+    max-width: 40%;
 }
 
 #mainTerminal button {
@@ -13,5 +14,9 @@
 }
 
 #setUpDropbox {
-    margin-top: 10%;
+    margin-top: 0.5cm;
+}
+
+#errorConsole {
+    color: red;
 }

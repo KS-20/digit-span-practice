@@ -108,7 +108,11 @@ class AppEngine {
                 this.currentSetRecord.getNumOfExercises();
             this.guiController.setNumToRecall(msg);
             this.guiController.focusStartButton();
-            await this.dropboxStorage.savePerfRecord(this.getPerformanceRecord());
+            try {
+                await this.dropboxStorage.savePerfRecord(this.getPerformanceRecord());
+            } catch (e) {
+                this.processException(e);
+            }
         }
 
         return false;
@@ -126,11 +130,27 @@ class AppEngine {
         } else {
             this.guiController.initNumOfReps(2);
         }
-        const perfRecord = await this.getDropboxStorage().loadPerfRecord();;
-        if (perfRecord) {
-            this.performanceRecord = perfRecord;
+        try {
+            const perfRecord = await this.getDropboxStorage().loadPerfRecord();;
+        } catch (e) {
+            this.processException(e);
         }
 
+    }
+
+    processException(e) {
+        if (e instanceof Dropbox.DropboxResponseError) {
+            let errorMsg = "error detected: \n" + e.toString() + "\n";
+            if (e.error && e.error.error_summary === "expired_access_token/...") {
+                errorMsg += "Dropbox access token has expired, suggested resolution: try to reauthenticate \n";
+            }
+            errorMsg += "error JSON string: \n" + JSON.stringify(e);
+            this.guiController.setErrorMessage(errorMsg);
+        } else if (e instanceof UserReportedError) {
+            this.guiController.setErrorMessage(e.getMessage());
+        } else {
+            throw e;
+        }
     }
 
     prepareForQuestion() {
@@ -158,6 +178,20 @@ class AppEngine {
     }
 }
 
+class UserReportedError {
+    constructor(message) {
+        this.message=message;
+    }
+
+    getMessage(){
+        return this.message;
+    }
+
+    toString(){
+        return this.getMessage();
+    }
+}
+
 class DropboxStorage {
     constructor() {
         this.redirectUri = '';
@@ -174,16 +208,18 @@ class DropboxStorage {
                 window.localStorage.setItem("codeVerifier", this.dbxAuth.codeVerifier);
                 window.open(authUrl);
             })
-            .catch((error) => this.reportError(error));
+            .catch((error) => {
+                throw error
+            });
     }
-    generateAccessToken(accessCode) {
+    async generateAccessToken(accessCode) {
         this.dbxAuth.setCodeVerifier(window.localStorage.getItem('codeVerifier'));
-        this.dbxAuth.getAccessTokenFromCode(this.redirectUri, accessCode)
+        await this.dbxAuth.getAccessTokenFromCode(this.redirectUri, accessCode)
             .then((response) => {
                 const accessToken = response.result.access_token;
                 const refreshToken = response.result.refresh_token;
                 window.localStorage.setItem("accessToken", accessToken);
-                window.localStorage.setItem("refreshToken",refreshToken);
+                window.localStorage.setItem("refreshToken", refreshToken);
                 this.dbxAuth.setAccessToken(accessToken);
                 this.dbxAuth.setRefreshToken(refreshToken);
                 this.dbx = new Dropbox.Dropbox({
@@ -191,7 +227,7 @@ class DropboxStorage {
                 });
             })
             .catch((error) => {
-                this.reportError(error)
+                throw error;
             });
     }
 
@@ -203,7 +239,7 @@ class DropboxStorage {
         const accessToken = window.localStorage.getItem("accessToken");
         const refreshToken = window.localStorage.getItem("refreshToken");
         if (accessToken === null) {
-            return;
+            throw new UserReportedError("Error , no access token is set for Dropbox (was the access code entered correctly?)");
         }
         this.dbxAuth.setCodeVerifier(codeVerifier);
         this.dbxAuth.setAccessToken(accessToken);
@@ -228,13 +264,11 @@ class DropboxStorage {
             mute: true,
             strict_conflict: false,
         }
+        if(!this.dbx) return;
+        
         await this.dbx.filesUpload(args);
     }
 
-    reportError(responseError) {
-        console.error(responseError)
-        console.error(responseError.error)
-    }
 }
 
 class HtmlPureGui {
@@ -335,6 +369,10 @@ class ReactGui {
 
     focusStartButton() {
         this.appComponent.focusStartButton();
+    }
+
+    setErrorMessage(msg) {
+        this.appComponent.setState({ errorMsg: msg });
     }
 }
 
