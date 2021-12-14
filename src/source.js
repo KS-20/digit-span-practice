@@ -131,7 +131,7 @@ class AppEngine {
             this.guiController.initNumOfReps(2);
         }
         try {
-            const perfRecord = await this.getDropboxStorage().loadPerfRecord();;
+            this.performanceRecord = await this.getDropboxStorage().loadPerfRecord();;
         } catch (e) {
             this.processException(e);
         }
