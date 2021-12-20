@@ -54,9 +54,10 @@ class App extends React.Component {
     this.startButton.current.focus();
   }
 
-  componentDidMount() {
+  async componentDidMount() {
     this.props.appEngine.getGuiController().setAppComponent(this);
-    this.props.appEngine.onPageLoad();
+    await this.props.appEngine.onPageLoad();
+    this.forceUpdate();
   }
   checkAnswer = (input) => {
     var appEngine = this.props.appEngine;
