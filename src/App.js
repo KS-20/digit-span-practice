@@ -44,7 +44,7 @@ InputForm.defaultProps = {
 class App extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { numToRecall: '12345', isInputMode: true };
+    this.state = { numToRecall: '12345', isInputMode: true, savingStatusLine: "" };
     this.startButton = React.createRef();
     this.saveSettingButton = React.createRef();
     this.setUpDropbox = this.setUpDropbox.bind(this);
@@ -105,6 +105,7 @@ class App extends React.Component {
     try {
       await dropboxStorage.generateAccessToken(accessCode);
     } catch (e) {
+      this.setState({ savingStatusLine: "" });
       appEngine.processException(e);
     }
   }
@@ -137,7 +138,10 @@ class App extends React.Component {
           <p>Number of reps:</p>
           <InputForm nameSuffix="_RepCount" onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
           <button id="saveSettings" type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
-          <button id="setUpDropbox" type="button" onClick={this.setUpDropbox} >Set up Dropbox Storage</button>
+          <div id="dropboxLine">
+            <button id="setUpDropbox" type="button" onClick={this.setUpDropbox} >Set up Dropbox Storage</button>
+            <div>{this.state.savingStatusLine}</div>
+          </div>
           <div id="errorConsole">
             {errorElements}
           </div>

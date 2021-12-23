@@ -14,9 +14,17 @@
 }
 
 #setUpDropbox {
-    margin-top: 0.5cm;
+    margin-right: 0.5cm;
+    font-size: 14px;
 }
 
 #errorConsole {
     color: red;
+}
+
+#dropboxLine {
+    font-size: 17px;
+    margin-top: 0.5cm;
+    display: flex;
+    color: green;
 }

@@ -89,7 +89,6 @@ class AppEngine {
     }
 
     async onSubmitAnswer() {
-
         var str = this.guiController.getInput();
         if (str === this.numToRecall) {
             alert("Good job! you put the correct answer: " + str);
@@ -109,8 +108,11 @@ class AppEngine {
             this.guiController.setNumToRecall(msg);
             this.guiController.focusStartButton();
             try {
+                this.guiController.setSavingStatusLine("Trying to upload data to Dropbox");
                 await this.dropboxStorage.savePerfRecord(this.getPerformanceRecord());
+                this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
             } catch (e) {
+                this.guiController.setSavingStatusLine("");
                 this.processException(e);
             }
         }
@@ -131,8 +133,12 @@ class AppEngine {
             this.guiController.initNumOfReps(2);
         }
         try {
-            this.performanceRecord = await this.getDropboxStorage().loadPerfRecord();;
+            this.guiController.setSavingStatusLine("Trying to load data from Dropbox");
+            this.performanceRecord = await this.getDropboxStorage().loadPerfRecord();
+            this.guiController.setSavingStatusLine("Data from Dropbox loaded successfully");
+
         } catch (e) {
+            this.guiController.setSavingStatusLine("");
             this.processException(e);
         }
 
@@ -192,6 +198,13 @@ class UserReportedError {
     }
 }
 
+class NoAccessTokenError extends UserReportedError {
+    constructor(message) {
+        super();
+        this.message="Error , no access token is set for Dropbox (was the access code entered correctly?)";
+    }
+}
+
 class DropboxStorage {
     constructor() {
         this.redirectUri = '';
@@ -239,7 +252,7 @@ class DropboxStorage {
         const accessToken = window.localStorage.getItem("accessToken");
         const refreshToken = window.localStorage.getItem("refreshToken");
         if (accessToken === null) {
-            throw new UserReportedError("Error , no access token is set for Dropbox (was the access code entered correctly?)");
+            throw new NoAccessTokenError();
         }
         this.dbxAuth.setCodeVerifier(codeVerifier);
         this.dbxAuth.setAccessToken(accessToken);
@@ -264,7 +277,7 @@ class DropboxStorage {
             mute: true,
             strict_conflict: false,
         }
-        if(!this.dbx) return;
+        if(!this.dbx) throw new NoAccessTokenError();
         
         await this.dbx.filesUpload(args);
     }
@@ -373,6 +386,10 @@ class ReactGui {
 
     setErrorMessage(msg) {
         this.appComponent.setState({ errorMsg: msg });
+    }
+
+    setSavingStatusLine(msg) {
+        this.appComponent.setState({ savingStatusLine: msg });
     }
 }
 
