@@ -217,7 +217,9 @@ class DropboxStorage {
     doAuthentication() {
         return this.dbxAuth.getAuthenticationUrl(this.redirectUri, undefined, 'code', 'offline', undefined, undefined, true)
             .then(authUrl => {
-                window.localStorage.clear();
+                window.localStorage.removeItem("accessToken");
+                window.localStorage.removeItem("refreshToken");
+        
                 window.localStorage.setItem("codeVerifier", this.dbxAuth.codeVerifier);
                 window.open(authUrl);
             })
