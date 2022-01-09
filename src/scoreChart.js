@@ -4,6 +4,12 @@ import ReactApexChart from "react-apexcharts";
 class ScoreChart extends React.Component {
   constructor(props) {
     super(props);
+    /* TODO: see why performance is slow for about 4000 SetRecords , apexchart feature section 
+    on the website shows a demo with 25K points, Maybe migrate to chart.js which reportedly
+    can handle 1M points? or github.com/leeoniya/uPlot?.
+    also according to this: https://github.com/apexcharts/apexcharts.js/issues/214#issuecomment-442370063
+    apexchart is not built to handle thousands of points.
+    */
 
     this.state = {
       options: {
@@ -14,14 +20,17 @@ class ScoreChart extends React.Component {
           toolbar: {
             autoSelected: 'pan',
             show: false
-          }
+          },
+          animations: {
+            enabled: false
+          }        
         },
         colors: ['#546E7A'],
         stroke: {
           width: 3
         },
         dataLabels: {
-          enabled: true
+          enabled: false
         },
         fill: {
           opacity: 1,
@@ -30,7 +39,10 @@ class ScoreChart extends React.Component {
           size: 0
         },
         xaxis: {
-          type: 'category'
+          type: 'category',
+          labels: {
+            show: false
+          }
         }
       },
 
@@ -51,6 +63,9 @@ class ScoreChart extends React.Component {
             //   max: 4,
             // }
           },
+          animations: {
+            enabled: false
+          },
         },
         colors: ['#008FFB'],
         fill: {
@@ -60,10 +75,16 @@ class ScoreChart extends React.Component {
             opacityTo: 0.1,
           }
         },
+        markers: {
+          size: 0
+        },
         xaxis: {
           type: 'category',
           tooltip: {
             enabled: true
+          },
+          labels: {
+            show: false
           }
         },
         yaxis: {

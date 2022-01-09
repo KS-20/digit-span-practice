@@ -397,4 +397,4 @@ class ReactGui {
 
 var appEngine = new AppEngine(new ReactGui());
 
-export default appEngine;
+export {appEngine,SetRecord};
