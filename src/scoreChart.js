@@ -41,7 +41,7 @@ class ScoreChart extends React.Component {
         xaxis: {
           type: 'category',
           labels: {
-            show: false
+            show: true
           }
         }
       },

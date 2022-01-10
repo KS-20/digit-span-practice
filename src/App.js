@@ -55,9 +55,10 @@ class App extends React.Component {
   }
 
   async componentDidMount() {
+    this.startButton.current.disabled = true;
     this.props.appEngine.getGuiController().setAppComponent(this);
     await this.props.appEngine.onPageLoad();
-    this.forceUpdate();
+    this.startButton.current.disabled = false;
   }
   checkAnswer = (input) => {
     var appEngine = this.props.appEngine;
