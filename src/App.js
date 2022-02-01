@@ -1,6 +1,7 @@
 import React from 'react';
 import ScoreChart from './scoreChart.js'
 import './mystyle.css'
+import { names } from './names.js'
 
 class InputForm extends React.Component {
   constructor(props) {
@@ -47,6 +48,7 @@ class App extends React.Component {
     this.state = { numToRecall: '12345', isInputMode: true, savingStatusLine: "" };
     this.startButton = React.createRef();
     this.saveSettingButton = React.createRef();
+    this.storageTypeButton = React.createRef();
     this.setUpDropbox = this.setUpDropbox.bind(this);
   }
 
@@ -54,10 +56,15 @@ class App extends React.Component {
     this.startButton.current.focus();
   }
 
+  setStorageTypeButton = (storageTypeStr) => {
+    this.storageTypeButton.current.value = storageTypeStr;
+  }
+
   async componentDidMount() {
     this.startButton.current.disabled = true;
     this.props.appEngine.getGuiController().setAppComponent(this);
     await this.props.appEngine.onPageLoad();
+    this.forceUpdate();
     this.startButton.current.disabled = false;
   }
   checkAnswer = (input) => {
@@ -74,6 +81,19 @@ class App extends React.Component {
   setNumOfRepsField = (numOfReps) => {
     this.numOfRepsField = numOfReps;
     this.AdjustDisableStatus();
+  }
+
+  setStorageTech = (event) => {
+    var appEngine = this.props.appEngine;
+    var sourceToSwitchTo = event.target.value;
+    if (names.browserStorage === sourceToSwitchTo) {
+      appEngine.switchToBrowserStorage();
+    } else if (names.dropbox === sourceToSwitchTo) {
+      appEngine.switchToDropboxStorage();
+    } else {
+      console.error("Invalid string");
+    }
+
   }
 
   AdjustDisableStatus = () => {
@@ -139,6 +159,14 @@ class App extends React.Component {
           <p>Number of reps:</p>
           <InputForm nameSuffix="_RepCount" onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
           <button id="saveSettings" type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
+          <form>
+            <label htmlFor="dataSource">Save and Load to  </label>
+            <select onInput={this.setStorageTech} name="dataSource" id="dataSource" ref={this.storageTypeButton}>
+              <option value={names.dropbox}>{names.dropbox}</option>
+              <option value={names.browserStorage}>{names.browserStorage}</option>
+            </select>
+          </form>
+
           <div id="dropboxLine">
             <button id="setUpDropbox" type="button" onClick={this.setUpDropbox} >Set up Dropbox Storage</button>
             <div>{this.state.savingStatusLine}</div>

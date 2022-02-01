@@ -1,4 +1,5 @@
 // for reference: https://timodenk.com/blog/digit-span-test-online-tool/
+import {names} from './names.js'
 const Dropbox = require("dropbox")
 
 class SetRecord {
@@ -66,7 +67,8 @@ class AppEngine {
         this.numToRecall = "";
         this.guiController = guiController;
         this.performanceRecord = new PerformanceRecord();
-        this.dropboxStorage = new DropboxStorage();
+        this.dropboxStorage = new DropboxStorage(guiController);
+        this.longTermStorage = this.dropboxStorage;
     }
 
     getDropboxStorage() {
@@ -108,9 +110,7 @@ class AppEngine {
             this.guiController.setNumToRecall(msg);
             this.guiController.focusStartButton();
             try {
-                this.guiController.setSavingStatusLine("Trying to upload data to Dropbox");
-                await this.dropboxStorage.savePerfRecord(this.getPerformanceRecord());
-                this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
+                await this.longTermStorage.savePerfRecord(this.getPerformanceRecord());
             } catch (e) {
                 this.guiController.setSavingStatusLine("");
                 this.processException(e);
@@ -132,11 +132,15 @@ class AppEngine {
         } else {
             this.guiController.initNumOfReps(2);
         }
-        try {
-            this.guiController.setSavingStatusLine("Trying to load data from Dropbox");
-            this.performanceRecord = await this.getDropboxStorage().loadPerfRecord();
-            this.guiController.setSavingStatusLine("Data from Dropbox loaded successfully");
 
+        if( localStorage.storageType === names.browserStorage ) {
+            this.switchToBrowserStorage();
+        } else if ( localStorage.storageType === names.dropbox ) {
+            this.switchToDropboxStorage();
+        }
+
+        try {
+            this.performanceRecord = await this.longTermStorage.loadPerfRecord();
         } catch (e) {
             this.guiController.setSavingStatusLine("");
             this.processException(e);
@@ -182,6 +186,18 @@ class AppEngine {
     switchToPureHtmlGui() {
         this.guiController = new HtmlPureGui();
     }
+
+    switchToDropboxStorage() {
+        localStorage.setItem("storageType", names.dropbox);
+        this.guiController.setStorageTypeButton(names.dropbox);
+        this.longTermStorage = this.dropboxStorage;
+    }
+
+    switchToBrowserStorage() {
+        localStorage.setItem("storageType", names.browserStorage);
+        this.guiController.setStorageTypeButton(names.browserStorage);
+        this.longTermStorage = new BrowserStorage();
+    }
 }
 
 class UserReportedError {
@@ -205,13 +221,33 @@ class NoAccessTokenError extends UserReportedError {
     }
 }
 
+class BrowserStorage {
+    async loadPerfRecord() {
+        var performanceRecord = new PerformanceRecord();
+        const jsonString = window.localStorage.getItem(BrowserStorage.getItemName());
+        performanceRecord.populateFromJson(jsonString);
+        return performanceRecord;
+    }
+    
+    async savePerfRecord(performanceRecord) {
+        var fileContent = JSON.stringify(performanceRecord);
+        window.localStorage.setItem(BrowserStorage.getItemName(), fileContent);
+
+    }
+
+    static getItemName() {
+        return "performanceRecordLocalStorage";
+    }
+}
+
 class DropboxStorage {
-    constructor() {
+    constructor(guiController) {
         this.redirectUri = '';
         var CLIENT_ID = 'y9rc6q1jk1bg8lx';
         this.dbxAuth = new Dropbox.DropboxAuth({
             clientId: CLIENT_ID,
         });
+        this.guiController = guiController;
     }
 
     doAuthentication() {
@@ -246,9 +282,9 @@ class DropboxStorage {
             });
     }
 
-    async loadPerfRecord() {
-        var args = {
-            path: "/digit_span_perf_record.json",
+    setUpDbx() {
+        if (this.dbx) {
+            return; //If We recreate dbx it returns: "error_summary":"expired_access_token/" error, I don't know why
         }
         const codeVerifier = window.localStorage.getItem('codeVerifier');
         const accessToken = window.localStorage.getItem("accessToken");
@@ -262,14 +298,25 @@ class DropboxStorage {
         this.dbx = new Dropbox.Dropbox({
             auth: this.dbxAuth
         });
+    }
+
+    async loadPerfRecord() {
+        this.guiController.setSavingStatusLine("Trying to load data from Dropbox");
+        var args = {
+            path: "/digit_span_perf_record.json",
+        }
+        this.setUpDbx();
         var ans = await this.dbx.filesDownload(args);
         var jsonString = await ans.result.fileBlob.text();
         var performanceRecord = new PerformanceRecord();
         performanceRecord.populateFromJson(jsonString);
+        this.guiController.setSavingStatusLine("Data from Dropbox loaded successfully");
         return performanceRecord;
     }
 
     async savePerfRecord(performanceRecord) {
+        this.guiController.setSavingStatusLine("Trying to upload data to Dropbox");
+        this.setUpDbx();
         var fileContent = JSON.stringify(performanceRecord);
         var args = {
             contents: fileContent,
@@ -282,6 +329,7 @@ class DropboxStorage {
         if(!this.dbx) throw new NoAccessTokenError();
         
         await this.dbx.filesUpload(args);
+        this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
     }
 
 }
@@ -392,6 +440,10 @@ class ReactGui {
 
     setSavingStatusLine(msg) {
         this.appComponent.setState({ savingStatusLine: msg });
+    }
+
+    setStorageTypeButton (storageTypeStr){
+        this.appComponent.setStorageTypeButton(storageTypeStr);
     }
 }
 
