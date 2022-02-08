@@ -115,10 +115,10 @@ class ScoreChart extends React.Component {
     return (
       <div id="wrapper">
         <div id="chart-line2">
-          <ReactApexChart options={this.state.options} series={series} type="line" height={120} width={600}/>
+          <ReactApexChart options={this.state.options} series={series} type="line" height={"120px"} width={"600px"}/>
         </div>
         <div id="chart-line">
-          <ReactApexChart options={this.state.optionsLine} series={seriesLine} type="area" height={120} width={600}  />
+          <ReactApexChart options={this.state.optionsLine} series={seriesLine} type="area" height={"120px"} width={"600px"}  />
         </div>
       </div>
     );
