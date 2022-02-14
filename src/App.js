@@ -45,12 +45,39 @@ InputForm.defaultProps = {
 class App extends React.Component {
   constructor(props) {
     super(props);
+    console.log("Starting digit span practice app");
     this.state = { numToRecall: '12345', isInputMode: true, savingStatusLine: "" };
+    this.requestAccessCode = false;
     this.startButton = React.createRef();
     this.saveSettingButton = React.createRef();
     this.storageTypeButton = React.createRef();
+
     this.setUpDropbox = this.setUpDropbox.bind(this);
+    this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
+
+    document.removeEventListener("visibilitychange",document._visibilityEventHandler);
+    document.addEventListener("visibilitychange", this.handleVisibilityChange);
+    document._visibilityEventHandler = this.handleVisibilityChange;
+
   }
+
+  // window.prompt does not open in chrome when it's not the active tab (at least on certain conditions)
+  // so we wait for the window to become visible, this is the error: https://chromestatus.com/feature/5637107137642496
+  async handleVisibilityChange () {
+    if ( this.requestAccessCode && document.visibilityState === "visible" ) {
+      this.requestAccessCode = false;
+      var appEngine = this.props.appEngine;
+      var dropboxStorage = appEngine.getDropboxStorage();  
+      var accessCode = prompt("Enter the access code provided by dropbox:");
+      try {
+        await dropboxStorage.generateAccessToken(accessCode);
+      } catch (e) {
+        this.setState({ savingStatusLine: "" });
+        appEngine.processException(e);
+      }
+  
+    }
+  }  
 
   focusStartButton = () => {
     this.startButton.current.focus();
@@ -119,16 +146,9 @@ class App extends React.Component {
   }
 
   async setUpDropbox() {
-    var appEngine = this.props.appEngine;
-    var dropboxStorage = appEngine.getDropboxStorage();
+    var dropboxStorage = this.props.appEngine.getDropboxStorage();
     await dropboxStorage.doAuthentication();
-    var accessCode = prompt("Enter the access code provided by dropbox:");
-    try {
-      await dropboxStorage.generateAccessToken(accessCode);
-    } catch (e) {
-      this.setState({ savingStatusLine: "" });
-      appEngine.processException(e);
-    }
+    this.requestAccessCode = true;
   }
 
   render() {
