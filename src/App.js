@@ -71,6 +71,7 @@ class App extends React.Component {
       var accessCode = prompt("Enter the access code provided by dropbox:");
       try {
         await dropboxStorage.generateAccessToken(accessCode);
+        await appEngine.loadPerfRecord();
       } catch (e) {
         this.setState({ savingStatusLine: "" });
         appEngine.processException(e);

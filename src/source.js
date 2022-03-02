@@ -139,8 +139,14 @@ class AppEngine {
             this.switchToDropboxStorage();
         }
 
+        await this.loadPerfRecord();
+    }
+
+    async loadPerfRecord() {
         try {
+            this.guiController.setErrorMessage("");
             this.performanceRecord = await this.longTermStorage.loadPerfRecord();
+            this.guiController.updateGUI();
         } catch (e) {
             this.guiController.setSavingStatusLine("");
             this.processException(e);
@@ -446,6 +452,10 @@ class ReactGui {
 
     setStorageTypeButton(storageTypeStr) {
         this.appComponent.setStorageTypeButton(storageTypeStr);
+    }
+
+    updateGUI(){
+        this.appComponent.forceUpdate();
     }
 }
 
