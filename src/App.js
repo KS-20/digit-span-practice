@@ -2,6 +2,12 @@ import React from 'react';
 import ScoreChart from './scoreChart.js'
 import './mystyle.css'
 import { names } from './names.js'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link
+} from "react-router-dom";
 
 class InputForm extends React.Component {
   constructor(props) {
@@ -42,7 +48,33 @@ InputForm.defaultProps = {
   nameSuffix: "",
 }
 
+class AboutPage extends React.Component {
+  render() {
+    return (
+      <>
+        <p>Digit span is a measure of short term and working memory , 
+        it is bascially the number of digits a person can remember, Reportedly most can remember between 5-9,
+        But a <a href="https://www.science.org/doi/abs/10.1126/science.7375930">study</a> trained someone to recall up to 79 digit, 
+        and a <a href="http://help.cambridgebrainsciences.com/en/articles/624895-what-is-the-digit-span-test">world record</a> was set for 3029 digits.</p>
+        <Link to="/">Back to main screen</Link>
+      </>
+    )
+  }
+}
+
 class App extends React.Component {
+  render() {
+    return (
+      <Router>
+        <Routes>
+          <Route path="/" element={<PracticeScreen appEngine={this.props.appEngine} />} />
+          <Route path="/about" element={<AboutPage />} />
+        </Routes>
+      </Router>)
+  }
+}
+
+class PracticeScreen extends React.Component {
   constructor(props) {
     super(props);
     console.log("Starting digit span practice app");
@@ -55,7 +87,7 @@ class App extends React.Component {
     this.setUpDropbox = this.setUpDropbox.bind(this);
     this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
 
-    document.removeEventListener("visibilitychange",document._visibilityEventHandler);
+    document.removeEventListener("visibilitychange", document._visibilityEventHandler);
     document.addEventListener("visibilitychange", this.handleVisibilityChange);
     document._visibilityEventHandler = this.handleVisibilityChange;
 
@@ -63,11 +95,11 @@ class App extends React.Component {
 
   // window.prompt does not open in chrome when it's not the active tab (at least on certain conditions)
   // so we wait for the window to become visible, this is the error: https://chromestatus.com/feature/5637107137642496
-  async handleVisibilityChange () {
-    if ( this.requestAccessCode && document.visibilityState === "visible" ) {
+  async handleVisibilityChange() {
+    if (this.requestAccessCode && document.visibilityState === "visible") {
       this.requestAccessCode = false;
       var appEngine = this.props.appEngine;
-      var dropboxStorage = appEngine.getDropboxStorage();  
+      var dropboxStorage = appEngine.getDropboxStorage();
       var accessCode = prompt("Enter the access code provided by dropbox:");
       try {
         await dropboxStorage.generateAccessToken(accessCode);
@@ -76,9 +108,9 @@ class App extends React.Component {
         this.setState({ savingStatusLine: "" });
         appEngine.processException(e);
       }
-  
+
     }
-  }  
+  }
 
   focusStartButton = () => {
     this.startButton.current.focus();
@@ -195,6 +227,7 @@ class App extends React.Component {
           <div id="errorConsole">
             {errorElements}
           </div>
+          <Link to="/about">About this task</Link>
         </div>
         <div id="scoreChart">
           <ScoreChart performenceRecord={this.props.appEngine.getPerformanceRecord()} />
