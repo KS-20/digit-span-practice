@@ -1,6 +1,7 @@
 const names = {
     dropbox: "Dropbox",
-    browserStorage: "Browser Storage"
+    browserStorage: "Browser Storage",
+    noCatagory: "None"
 }
 
 export {names};

@@ -5,6 +5,7 @@ const Dropbox = require("dropbox")
 class SetRecord {
     constructor() {
         this.setRecordArray = [];
+        this.catagory = "";
     }
     addScore(score) {
         this.setRecordArray.push(score);
@@ -30,6 +31,14 @@ class SetRecord {
 
     getSuccessRate() {
         return Math.round(this.getNumOfSuccessfulExercises() / this.getNumOfExercises() * 100);
+    }
+
+    getCatagory () {
+        return this.catagory;
+    }
+
+    setCatagory (catagoryName) {
+        this.catagory = catagoryName;
     }
 }
 
@@ -57,6 +66,7 @@ class PerformanceRecord {
             for (let score of unTypedSetRecord.setRecordArray) {
                 setRecord.addScore(score);
             }
+            setRecord.setCatagory(unTypedSetRecord.catagory);
             this.addSetRecord(setRecord)
         }
     }
@@ -69,6 +79,8 @@ class AppEngine {
         this.performanceRecord = new PerformanceRecord();
         this.dropboxStorage = new DropboxStorage(guiController);
         this.longTermStorage = this.dropboxStorage;
+        this.trailCatagoryArray = [];
+        this.currentCatagory = names.noCatagory;
     }
 
     getDropboxStorage() {
@@ -104,6 +116,9 @@ class AppEngine {
         if (this.currentRepIndex < this.guiController.getNumOfReps()) {
             this.prepareForQuestion();
         } else {
+            if( this.currentCatagory !== names.noCatagory ) {
+                this.currentSetRecord.setCatagory(this.currentCatagory);
+            }
             this.performanceRecord.addSetRecord(this.currentSetRecord);
             var msg = "succeeded in  " + this.currentSetRecord.getNumOfSuccessfulExercises() + " out of " +
                 this.currentSetRecord.getNumOfExercises();
@@ -140,6 +155,16 @@ class AppEngine {
         }
 
         await this.loadPerfRecord();
+        await this.loadCatagoryData();
+    }
+
+    async loadCatagoryData() {
+        this.trailCatagoryArray = await this.longTermStorage.loadCatagoryArray();
+        for(const trailCatagory of this.trailCatagoryArray) {
+            this.guiController.addTrailCatagory(trailCatagory) ;
+        }
+        this.currentCatagory = await this.longTermStorage.loadCurrentCatagory();
+        this.guiController.setSelectedCatagory(this.currentCatagory);
     }
 
     async loadPerfRecord() {
@@ -151,7 +176,6 @@ class AppEngine {
             this.guiController.setSavingStatusLine("");
             this.processException(e);
         }
-
     }
 
     processException(e) {
@@ -204,6 +228,34 @@ class AppEngine {
         this.guiController.setStorageTypeButton(names.browserStorage);
         this.longTermStorage = new BrowserStorage();
     }
+
+    addTrailCatagory(name) {
+        this.trailCatagoryArray.push(name);
+        this.guiController.addTrailCatagory(name);
+        this.longTermStorage.saveTrailCatagories(this.trailCatagoryArray);
+    }
+    removeTrailCatagory(name) {
+        var callback = (currentValue) => { return currentValue !== name };
+        this.trailCatagoryArray = this.trailCatagoryArray.filter(callback);
+        this.guiController.removeTrailCatagory(name);
+        if(this.currentCatagory == name) {
+            this.switchToCatagory(names.noCatagory);
+        }
+        this.longTermStorage.saveTrailCatagories(this.trailCatagoryArray);
+    }
+
+    getCurrentCatagory() {
+        return this.currentCatagory;
+    }
+
+    switchToCatagory(name) {
+        this.currentCatagory = name;
+        this.longTermStorage.saveCurrentCatagory(name);
+    }
+
+    getTrailCatagories(){
+        return this.trailCatagoryArray;
+    }
 }
 
 class UserReportedError {
@@ -230,7 +282,7 @@ class NoAccessTokenError extends UserReportedError {
 class BrowserStorage {
     async loadPerfRecord() {
         var performanceRecord = new PerformanceRecord();
-        const jsonString = window.localStorage.getItem(BrowserStorage.getItemName());
+        const jsonString = window.localStorage.getItem(BrowserStorage.getPerfItemName());
         if (jsonString) {
             performanceRecord.populateFromJson(jsonString);
         }
@@ -238,13 +290,44 @@ class BrowserStorage {
     }
 
     async savePerfRecord(performanceRecord) {
-        var fileContent = JSON.stringify(performanceRecord);
-        window.localStorage.setItem(BrowserStorage.getItemName(), fileContent);
+        var jsonString = JSON.stringify(performanceRecord);
+        window.localStorage.setItem(BrowserStorage.getPerfItemName(), jsonString);
 
     }
 
-    static getItemName() {
+    static getPerfItemName() {
         return "performanceRecordLocalStorage";
+    }
+
+    static getCatagoriesItemName() {
+        return "trailCatagoriesLocalStorage";
+    }
+
+    static getCurrentCatagoryItemName(){
+        return "currentCatagoryLocalStorage";
+    }
+
+    saveTrailCatagories(catagoriesArray){
+        var jsonString = JSON.stringify(catagoriesArray);
+        window.localStorage.setItem(BrowserStorage.getCatagoriesItemName(), jsonString);
+    }
+
+    saveCurrentCatagory(currentCatagory) {
+        window.localStorage.setItem(BrowserStorage.getCurrentCatagoryItemName(),currentCatagory);
+    }
+
+    loadCurrentCatagory(){
+        return window.localStorage.getItem(BrowserStorage.getCurrentCatagoryItemName());
+    }
+
+    loadCatagoryArray() {
+        const jsonString = window.localStorage.getItem(BrowserStorage.getCatagoriesItemName());
+        var parsedJSON = JSON.parse(jsonString);
+        if (parsedJSON == null) {
+            return []
+        } else {
+            return parsedJSON;
+        }
     }
 }
 
@@ -256,6 +339,105 @@ class DropboxStorage {
             clientId: CLIENT_ID,
         });
         this.guiController = guiController;
+    }
+
+    async saveTrailCatagories(catagoriesArray){
+        this.guiController.setSavingStatusLine("Trying to upload data to Dropbox");
+        this.setUpDbx();
+        var fileContent = JSON.stringify(catagoriesArray);
+        var args = {
+            contents: fileContent,
+            path: "/digit_span_catagories_array.json",
+            mode: { ".tag": "overwrite" },
+            autorename: true,
+            mute: true,
+            strict_conflict: false,
+        }
+        if (!this.dbx) throw new NoAccessTokenError();
+
+        await this.dbx.filesUpload(args);
+        this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
+    }
+
+    async saveCurrentCatagory(currentCatagory){
+        this.guiController.setSavingStatusLine("Trying to upload data to Dropbox");
+        this.setUpDbx();
+        var fileContent = JSON.stringify(currentCatagory);
+        var args = {
+            contents: fileContent,
+            path: "/digit_span_current_catagory.json",
+            mode: { ".tag": "overwrite" },
+            autorename: true,
+            mute: true,
+            strict_conflict: false,
+        }
+        if (!this.dbx) throw new NoAccessTokenError();
+
+        await this.dbx.filesUpload(args);
+        this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
+    }
+
+    async loadCurrentCatagory(){
+        var startingStatusLine = "Trying to load current catagory from Dropbox";
+        var endingStatusLine = "Current catagory loaded successfully from Dropbox";
+        var infoNotFoundMsg = "Current catagory information not found in Dropbox";
+        var fileName = "digit_span_current_catagory.json";
+        const jsonString = await this.downloadFromDropbox(startingStatusLine,endingStatusLine,infoNotFoundMsg,fileName);
+        if(jsonString == null) {
+            return names.noCatagory;
+        } else {
+            var currentCatagory = JSON.parse(jsonString);
+            return currentCatagory;    
+        }
+    }
+
+    async loadPerfRecord() {
+        var startingStatusLine = "Trying to load performance data from Dropbox";
+        var endingStatusLine = "Performance data from Dropbox loaded successfully";
+        var infoNotFoundMsg = "Performance data not found in Dropbox";
+        var fileName = "digit_span_perf_record.json";
+        const jsonString = await this.downloadFromDropbox(startingStatusLine,endingStatusLine,infoNotFoundMsg,fileName);
+        var performanceRecord = new PerformanceRecord();
+        if(jsonString != null) {
+            performanceRecord.populateFromJson(jsonString);
+        } 
+        return performanceRecord;
+    }
+
+
+    async downloadFromDropbox(startingStatusLine,endingStatusLine,infoNotFoundMsg,fileName){
+        this.guiController.setSavingStatusLine(startingStatusLine);
+        var args = {
+            path: "/"+fileName,
+        }
+        this.setUpDbx();
+        try {
+            //When the file does not exist, a error message is written to the firefox console ("409 Conflict"), consider checking if the file exist using "filesListFolder(arg)", see https://stackoverflow.com/questions/58289223/checking-file-existence-dropbox-api-v2
+            var ans = await this.dbx.filesDownload(args);
+        } catch (e) {
+            if (e.error && e.error.error_summary.substring(0,15) === "path/not_found/") {
+                this.guiController.setSavingStatusLine(infoNotFoundMsg);
+                return null;
+            }
+            throw e;
+        }
+        var jsonString = await ans.result.fileBlob.text();
+        this.guiController.setSavingStatusLine(endingStatusLine);
+        return jsonString;
+    }
+
+    async loadCatagoryArray(){
+        var startingStatusLine = "Trying to load list of catagories from Dropbox";
+        var endingStatusLine = "list of catagories loaded successfully from Dropbox";
+        var infoNotFoundMsg = "Performance data not found in Dropbox";
+        var fileName = "digit_span_catagories_array.json";
+        const jsonString = await this.downloadFromDropbox(startingStatusLine,endingStatusLine,infoNotFoundMsg,fileName);
+        if(jsonString == null) {
+            return [];
+        } else {
+            var catagoryArray = JSON.parse(jsonString);
+            return catagoryArray;    
+        }
     }
 
     doAuthentication() {
@@ -306,20 +488,6 @@ class DropboxStorage {
         this.dbx = new Dropbox.Dropbox({
             auth: this.dbxAuth
         });
-    }
-
-    async loadPerfRecord() {
-        this.guiController.setSavingStatusLine("Trying to load data from Dropbox");
-        var args = {
-            path: "/digit_span_perf_record.json",
-        }
-        this.setUpDbx();
-        var ans = await this.dbx.filesDownload(args);
-        var jsonString = await ans.result.fileBlob.text();
-        var performanceRecord = new PerformanceRecord();
-        performanceRecord.populateFromJson(jsonString);
-        this.guiController.setSavingStatusLine("Data from Dropbox loaded successfully");
-        return performanceRecord;
     }
 
     async savePerfRecord(performanceRecord) {
@@ -381,6 +549,33 @@ class HtmlPureGui {
 class ReactGui {
     setAppComponent(appComponent) {
         this.appComponent = appComponent;
+    }
+
+    setCatagoryComponent(catagoryComponent) {
+        this.catagoryComponent = catagoryComponent;
+    }
+
+    addTrailCatagory(name) {
+        this.catagoryComponent.setState((state, props) => {
+            var newArray = [...state.catagoryNamesArray]; //copy array because setState runs twice under <React.StrictMode>
+            newArray.push(name);
+            var result = {catagoryNamesArray: newArray };
+            return result;
+          });
+    }
+
+    removeTrailCatagory(name) {
+        this.catagoryComponent.setState((state, props) => {
+            var newArray = [...state.catagoryNamesArray]; //copy array because setState runs twice under <React.StrictMode>
+            var callback = (currentValue) => { return currentValue !== name };
+            newArray = newArray.filter(callback);    
+            var result = {catagoryNamesArray: newArray };
+            return result;
+          });
+    }
+
+    setSelectedCatagory(name) {
+        this.catagoryComponent.setSelectedCatagory(name);
     }
 
     setInput(input) {

@@ -1,5 +1,6 @@
 import React from "react";
 import ReactApexChart from "react-apexcharts";
+import { names } from './names.js'
 
 class ScoreChart extends React.Component {
   constructor(props) {
@@ -23,7 +24,7 @@ class ScoreChart extends React.Component {
           },
           animations: {
             enabled: false
-          }        
+          }
         },
         colors: ['#546E7A'],
         stroke: {
@@ -98,11 +99,21 @@ class ScoreChart extends React.Component {
 
     var setNum = 1;
     var data = [];
+    var currentCatagory = this.props.currentCatagory;
     for (var setRecord of this.props.performenceRecord) {
-      data.push([setNum,setRecord.getSuccessRate()]);
-      setNum++;
+      if (currentCatagory === names.noCatagory || setRecord.getCatagory() ===  currentCatagory ) {
+        data.push([setNum, setRecord.getSuccessRate()]);
+        setNum++;
+      }
     }
-    
+
+    var catagoryDisplayLine ;
+    if( currentCatagory !== names.noCatagory ) {
+      catagoryDisplayLine = <p id="catagoryDisplayLine">Showing results only for catagory "{currentCatagory}"</p>;
+    } else {
+      catagoryDisplayLine = <p>Showing results for all catagories</p>;
+    }
+
     var series = [{
       name: "average success rate",
       data: data
@@ -115,11 +126,12 @@ class ScoreChart extends React.Component {
     return (
       <div id="wrapper">
         <div id="chart-line2">
-          <ReactApexChart options={this.state.options} series={series} type="line" height={"120px"} width={"600px"}/>
+          <ReactApexChart options={this.state.options} series={series} type="line" height={"120px"} width={"600px"} />
         </div>
         <div id="chart-line">
-          <ReactApexChart options={this.state.optionsLine} series={seriesLine} type="area" height={"120px"} width={"600px"}  />
+          <ReactApexChart options={this.state.optionsLine} series={seriesLine} type="area" height={"120px"} width={"600px"} />
         </div>
+        {catagoryDisplayLine}
       </div>
     );
   }

@@ -52,10 +52,10 @@ class AboutPage extends React.Component {
   render() {
     return (
       <>
-        <p>Digit span is a measure of short term and working memory , 
-        it is bascially the number of digits a person can remember, Reportedly most can remember between 5-9,
-        But a <a href="https://www.science.org/doi/abs/10.1126/science.7375930">study</a> trained someone to recall up to 79 digit, 
-        and a <a href="http://help.cambridgebrainsciences.com/en/articles/624895-what-is-the-digit-span-test">world record</a> was set for 3029 digits.</p>
+        <p>Digit span is a measure of short term and working memory ,
+          it is bascially the number of digits a person can remember, Reportedly most can remember between 5-9,
+          But a <a href="https://www.science.org/doi/abs/10.1126/science.7375930">study</a> trained someone to recall up to 79 digit,
+          and a <a href="http://help.cambridgebrainsciences.com/en/articles/624895-what-is-the-digit-span-test">world record</a> was set for 3029 digits.</p>
         <Link to="/">Back to main screen</Link>
       </>
     )
@@ -71,6 +71,95 @@ class App extends React.Component {
           <Route path="/about" element={<AboutPage />} />
         </Routes>
       </Router>)
+  }
+}
+
+class TrailCatagoryWidget extends React.Component {
+  constructor(props) {
+    super(props);
+    this.catagorySelectMenu = React.createRef();
+    this.catagoryRemoveMenu = React.createRef();
+    this.state = {catagoryNamesArray: []};
+    this.catagoryWasAdded=false;
+  }
+
+  async componentDidMount() {
+    this.props.appEngine.getGuiController().setCatagoryComponent(this);
+  }
+
+  addCatagory = (event) => {
+    event.preventDefault();
+    var catagorySelectMenu = this.catagorySelectMenu.current
+    var options = catagorySelectMenu.options;
+    for (var i = 0; i < catagorySelectMenu.length; ++i) {
+      if (options[i].text === this.catagoryToAdd) {
+        return;
+      }
+    }
+    this.props.appEngine.addTrailCatagory(this.catagoryToAdd);
+    this.props.appEngine.switchToCatagory(this.catagoryToAdd);
+
+    this.catagoryWasAdded = true;
+  }
+
+  removeCatagory = (event) => {
+    event.preventDefault();
+    var name = this.catagoryRemoveMenu.current.value;
+    this.props.appEngine.removeTrailCatagory(name)
+  }
+
+  setSelectedCatagory(name) {
+    var catagorySelectMenu = this.catagorySelectMenu.current
+    var options = catagorySelectMenu.options;
+    for (var i = 0; i < catagorySelectMenu.length; ++i) {
+      if (options[i].text === name) {
+        catagorySelectMenu.selectedIndex = i;
+        return;
+      }
+    }
+  }
+
+  switchToCatagory = (event) => {
+    var name = this.catagorySelectMenu.current.value;
+    this.props.appEngine.switchToCatagory(name);
+  }
+
+  componentDidUpdate(){
+    if(this.catagoryWasAdded){
+      var catagorySelectMenu = this.catagorySelectMenu.current;
+      catagorySelectMenu.selectedIndex = catagorySelectMenu.length-1;
+      this.catagoryWasAdded = false;
+    }
+  }
+
+  render() {
+    var options = [];
+    for (var catagoryName of this.state.catagoryNamesArray) {
+      options.push(<option key={catagoryName} value={catagoryName}>{catagoryName}</option>);
+    }
+    return (<>
+      <form>
+        <label htmlFor="catagorySelect">Switch to catagory:  </label>
+        <select onInput={this.switchToCatagory} name="catagorySelect" id="catagorySelect" ref={this.catagorySelectMenu}>
+          <option value="None">None</option>
+          {options}
+        </select>
+      </form>
+      <form onSubmit={this.addCatagory}>
+        <label htmlFor="fname">Add trail catagory: </label>
+        <input type="text" id="fname" name="fname" onChange={(event) => { this.catagoryToAdd = event.target.value }} />
+        <input type="submit" value="Add" />
+      </form>
+
+      <form>
+        <label htmlFor="catagoryRemove">Remove catagory:   </label>
+        <select name="catagoryRemove" id="catagoryRemove" ref={this.catagoryRemoveMenu}>
+        {options}
+        </select>
+        <input onClick={this.removeCatagory} type="submit" value="remove" />
+      </form>
+    </>
+    )
   }
 }
 
@@ -108,7 +197,6 @@ class PracticeScreen extends React.Component {
         this.setState({ savingStatusLine: "" });
         appEngine.processException(e);
       }
-
     }
   }
 
@@ -227,10 +315,13 @@ class PracticeScreen extends React.Component {
           <div id="errorConsole">
             {errorElements}
           </div>
+          <TrailCatagoryWidget appEngine={this.props.appEngine}/>
+
           <Link to="/about">About this task</Link>
         </div>
         <div id="scoreChart">
-          <ScoreChart performenceRecord={this.props.appEngine.getPerformanceRecord()} />
+          <ScoreChart performenceRecord={this.props.appEngine.getPerformanceRecord()} 
+          currentCatagory={this.props.appEngine.getCurrentCatagory()} />
         </div>
       </>
     );
