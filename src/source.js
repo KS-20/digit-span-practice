@@ -238,7 +238,7 @@ class AppEngine {
         var callback = (currentValue) => { return currentValue !== name };
         this.trailCatagoryArray = this.trailCatagoryArray.filter(callback);
         this.guiController.removeTrailCatagory(name);
-        if(this.currentCatagory == name) {
+        if(this.currentCatagory === name) {
             this.switchToCatagory(names.noCatagory);
         }
         this.longTermStorage.saveTrailCatagories(this.trailCatagoryArray);
