@@ -2,11 +2,30 @@
 import { names } from './names.js'
 const Dropbox = require("dropbox")
 
+
 class SetRecord {
     constructor() {
         this.setRecordArray = [];
         this.catagory = "";
+        this.maxScore = 0;
     }
+
+    getMaxScore(){
+        return this.maxScore;
+    }
+
+    setMaxScore (maxScore){
+        this.maxScore = maxScore;
+    }
+
+    getAverageScore() {
+        var sum = 0;
+        for(var score of this.setRecordArray){
+            sum += score;
+        }
+        return sum/this.setRecordArray.length;
+    }
+
     addScore(score) {
         this.setRecordArray.push(score);
     }
@@ -63,6 +82,7 @@ class PerformanceRecord {
         for (const unTypedSetRecord of untypedObject.perfRecordArray) {
             let setRecord = new SetRecord();
             setRecord.setMinSuccessScore(unTypedSetRecord.minSuccessScore);
+            setRecord.setMaxScore(unTypedSetRecord.maxScore);
             for (let score of unTypedSetRecord.setRecordArray) {
                 setRecord.addScore(score);
             }
@@ -196,6 +216,7 @@ class AppEngine {
     prepareForQuestion() {
         this.guiController.activateDisplayMode()
         var numOfDigits = this.guiController.getNumOfDigits();
+        this.currentSetRecord.setMaxScore(numOfDigits);
         this.numToRecall = "";
         for (var i = 0; i < numOfDigits; ++i) {
             this.numToRecall += Math.floor(Math.random() * 10);
