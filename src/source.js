@@ -250,6 +250,18 @@ class AppEngine {
         this.longTermStorage = new BrowserStorage();
     }
 
+    async saveEverything() {
+        try {
+            await this.longTermStorage.savePerfRecord(this.getPerformanceRecord());
+            this.longTermStorage.saveTrailCatagories(this.trailCatagoryArray);
+            this.longTermStorage.saveCurrentCatagory(this.currentCatagory);    
+        } catch (e) {
+            this.guiController.setSavingStatusLine("");
+            this.processException(e);
+        }
+
+    }
+
     addTrailCatagory(name) {
         this.trailCatagoryArray.push(name);
         this.guiController.addTrailCatagory(name);

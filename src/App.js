@@ -231,7 +231,7 @@ class PracticeScreen extends React.Component {
     this.AdjustDisableStatus();
   }
 
-  setStorageTech = (event) => {
+   setStorageTech = async (event) => {
     var appEngine = this.props.appEngine;
     var sourceToSwitchTo = event.target.value;
     if (names.browserStorage === sourceToSwitchTo) {
@@ -241,6 +241,7 @@ class PracticeScreen extends React.Component {
     } else {
       console.error("Invalid string");
     }
+    await appEngine.saveEverything();
 
   }
 
