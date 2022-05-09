@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const path = require('path');
 require('dotenv').config();
 var pathToWebDriver = process.env['FIREFOX_DRIVER_DIR'];
