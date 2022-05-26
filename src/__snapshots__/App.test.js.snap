@@ -1,0 +1,39 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Snapshot of initial page 1`] = `
+"<div id=\\"mainTerminal\\">
+  <form name=\\"form_Digits\\"><input name=\\"input_Digits\\" type=\\"text\\" value=\\"\\"></form><button id=\\"startPractice\\" type=\\"button\\" disabled=\\"\\">start practice </button>
+  <p>length of number:</p>
+  <form name=\\"form_NumLen\\"><input name=\\"input_NumLen\\" type=\\"text\\" value=\\"2\\"></form>
+  <p>Number of reps:</p>
+  <form name=\\"form_RepCount\\"><input name=\\"input_RepCount\\" type=\\"text\\" value=\\"2\\"></form><button id=\\"saveSettings\\" type=\\"button\\" disabled=\\"\\">Save Settings</button>
+  <form><label for=\\"dataSource\\">Save and Load to </label><select name=\\"dataSource\\" id=\\"dataSource\\">
+      <option value=\\"Dropbox\\">Dropbox</option>
+      <option value=\\"Browser Storage\\">Browser Storage</option>
+    </select></form>
+  <div id=\\"dropboxLine\\"><button id=\\"setUpDropbox\\" type=\\"button\\">Set up Dropbox Storage</button>
+    <div>Trying to load performance data from Dropbox</div>
+  </div>
+  <div id=\\"errorConsole\\"></div>
+  <form><label for=\\"catagorySelect\\">Switch to catagory: </label><select name=\\"catagorySelect\\" id=\\"catagorySelect\\">
+      <option value=\\"None\\">None</option>
+    </select></form>
+  <form><label for=\\"fname\\">Add trail catagory: </label><input type=\\"text\\" id=\\"fname\\" name=\\"fname\\"><input type=\\"submit\\" value=\\"Add\\"></form>
+  <form><label for=\\"catagoryRemove\\">Remove catagory: </label><select name=\\"catagoryRemove\\" id=\\"catagoryRemove\\"></select><input type=\\"submit\\" value=\\"remove\\"></form><a href=\\"/about\\">About this task</a>
+</div>
+<div id=\\"scoreChart\\">
+  <div id=\\"wrapper\\">
+    <div id=\\"chart-line2\\">
+      <div></div>
+    </div>
+    <div id=\\"chart-line\\">
+      <div></div>
+    </div>
+    <form><label for=\\"displaySelect\\">Show in graph: </label><select name=\\"displaySelect\\" id=\\"displaySelect\\">
+        <option value=\\"Average score vs Length of number\\">Average score vs Length of number</option>
+        <option value=\\"Success rate\\">Success rate</option>
+      </select></form>
+    <p>Showing results for all catagories</p>
+  </div>
+</div>"
+`;
