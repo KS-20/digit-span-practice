@@ -34,8 +34,9 @@ class InputForm extends React.Component {
   render() {
     return (
       <form name={"form" + this.props.nameSuffix} onSubmit={this.onSubmit} >
-        <input name={"input" + this.props.nameSuffix} type={"text"} onChange={this.handleChange}
-          defaultValue={this.props.defaultValue} ref={(input) => { this.nameInput = input; }} />
+        <input name={"input" + this.props.nameSuffix} type={this.props.inputType} 
+        onChange={this.handleChange} defaultValue={this.props.defaultValue}
+         ref={(input) => { this.nameInput = input; }} />
       </form>
     );
   }
@@ -46,6 +47,7 @@ InputForm.defaultProps = {
   onChange: () => { },
   defaultValue: "",
   nameSuffix: "",
+  inputType: "text",
 }
 
 class AboutPage extends React.Component {
@@ -62,6 +64,149 @@ class AboutPage extends React.Component {
   }
 }
 
+class SignUpPage extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {userNameValue: "" , passwordValue: ""};
+  }
+
+  setUserName = (userNameValue) => {
+    this.setState({ userNameValue: userNameValue });
+
+  }
+
+  setPassword = (passwordValue) => {
+    this.setState({ passwordValue: passwordValue });
+  }
+
+  tryToSignUp = (event) => {
+    event.preventDefault();
+    if (this.state.userNameValue === ''){
+      alert("Please enter a user name before siging up");
+      return;
+    }
+    if (this.state.passwordValue === ''){
+      alert("Please enter a password before siging up");
+      return;
+    }
+    var requestBody = {
+      requestType: "signup",
+      userName: this.state.userNameValue,
+      password: this.state.passwordValue
+    }
+    var customStorage = this.props.appEngine.getCustomStorage();
+    const myRequest = new Request(customStorage.getServerUrl(),
+    {method: "POST",body: JSON.stringify(requestBody)});
+    fetch(myRequest)
+      .then((response) => {
+        if (!response.ok && response.status !== 409) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        response.json().then(function(json) {
+          alert(json.resultStr);
+        });
+    
+      }).catch(error => {
+        console.error(error);
+      });
+
+  }
+
+  render() {
+    var divStyle = {display: "grid", gridTemplateColumns: "100px"}
+    return (
+      <>
+        <div style={divStyle}>
+        <p>User Name:</p>
+        <InputForm nameSuffix="_userNameForSignUp" onChange={this.setUserName}  />
+        <p>Password</p>
+        <InputForm nameSuffix="_passwordForSignUp" onChange={this.setPassword} 
+        inputType="password"  />
+        <input type="submit" value="Sign up" onClick={this.tryToSignUp}/>
+
+        <Link to="/">Back to main screen</Link>
+        </div>
+      </>
+    )
+  }
+}
+
+class LoginPage extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.state = {userNameValue: "" , passwordValue: ""};
+  }
+
+  setUserName = (userNameValue) => {
+    this.setState({ userNameValue: userNameValue });
+
+  }
+
+  setPassword = (passwordValue) => {
+    this.setState({ passwordValue: passwordValue });
+  }
+
+  tryTologin = (event) => {
+    event.preventDefault();
+    if (this.state.userNameValue === ''){
+      alert("Please enter a user name before logging in");
+      return;
+    }
+    if (this.state.passwordValue === ''){
+      alert("Please enter a password before logging in");
+      return;
+    }
+    var requestBody = {
+      requestType: "login",
+      userName: this.state.userNameValue,
+      password: this.state.passwordValue
+    }
+    var customStorage = this.props.appEngine.getCustomStorage();
+    const myRequest = new Request(customStorage.getServerUrl(),
+    {method: "POST",body: JSON.stringify(requestBody)});
+    fetch(myRequest)
+      .then((response) => {
+        if (!response.ok && response.status !== 404) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        response.json().then(function(json) {
+          alert(json.resultStr);
+          if (json.resultStr === "Login Successful"){
+            customStorage.setAccessToken(json.accessToken);
+          } ;
+        });
+    
+      }).catch(error => {
+        console.error(error);
+      });
+
+  }
+
+  render() {
+    var divStyle = {display: "grid", gridTemplateColumns: "100px"}
+    return (
+      <>
+        <div style={divStyle}>
+        <p>User Name:</p>
+        <InputForm nameSuffix="_userNameForLogin" onChange={this.setUserName}  />
+        <p>Password</p>
+        <InputForm nameSuffix="_passwordForLogin" onChange={this.setPassword} 
+        inputType="password"  />
+        <input type="submit" value="log in" onClick={this.tryTologin}/>
+
+        <Link to="/">Back to main screen</Link>
+        </div>
+      </>
+    )
+  }
+}
+
+
+
 class App extends React.Component {
   render() {
     return (
@@ -69,6 +214,9 @@ class App extends React.Component {
         <Routes>
           <Route path="/" element={<PracticeScreen appEngine={this.props.appEngine} />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/signup" element={<SignUpPage appEngine={this.props.appEngine}/>} />
+          <Route path="/login" element={<LoginPage appEngine={this.props.appEngine}/>} />
+
         </Routes>
       </Router>)
   }
@@ -163,11 +311,32 @@ class TrailCatagoryWidget extends React.Component {
   }
 }
 
+class CustomStorageControls extends React.Component {
+  signUp = () => {
+    window.location.href = '/signup';
+  }
+
+  login = () => {
+    window.location.href = '/login';
+  }
+
+
+  render() {
+    return (
+      <div id="CustomStorageControls">
+      <button id="signIn" type="button" onClick={this.login} >Log In</button>
+      <button id="login" type="button" onClick={this.signUp} >Sign Up</button>
+      </div>
+      )
+  }
+}
+
 class PracticeScreen extends React.Component {
   constructor(props) {
     super(props);
     console.log("Starting digit span practice app");
-    this.state = { numToRecall: '12345', isInputMode: true, savingStatusLine: "" };
+    this.state = { numToRecall: '12345', isInputMode: true, savingStatusLine: "",
+    isUsingCustomStorage: this.props.appEngine.isUsingCustomStorage() };
     this.requestAccessCode = false;
     this.startButton = React.createRef();
     this.saveSettingButton = React.createRef();
@@ -238,8 +407,16 @@ class PracticeScreen extends React.Component {
       appEngine.switchToBrowserStorage();
     } else if (names.dropbox === sourceToSwitchTo) {
       appEngine.switchToDropboxStorage();
+    } else if (names.digitSpanPracticeServer) {
+      appEngine.switchToCustomStorage();
     } else {
       console.error("Invalid string");
+    }
+
+    if (appEngine.isUsingCustomStorage()) {
+      this.setState({ isUsingCustomStorage: true });
+    } else {
+      this.setState({ isUsingCustomStorage: false });
     }
     await appEngine.saveEverything();
 
@@ -275,6 +452,11 @@ class PracticeScreen extends React.Component {
 
   render() {
     var mainDisplay;
+    var appEngine = this.props.appEngine;
+    var custonStorageControls = "";
+    if(this.state.isUsingCustomStorage) {
+      custonStorageControls = <CustomStorageControls/>
+    } 
     if (this.state.isInputMode) {
       mainDisplay = <InputForm nameSuffix="_Digits" focusOnStart onSubmit={this.checkAnswer} />;
     } else {
@@ -293,10 +475,10 @@ class PracticeScreen extends React.Component {
       <>
         <div id="mainTerminal">
           {mainDisplay}
-          <button id="startPractice" type="button" autoFocus onClick={() => this.props.appEngine.startPracticeSet()}
+          <button id="startPractice" type="button" autoFocus onClick={() => appEngine.startPracticeSet()}
             ref={this.startButton}>
             start practice </button>
-          <p>length of number:</p>
+          <p>Length of number:</p>
           <InputForm nameSuffix="_NumLen" onChange={this.setNumLengthField} defaultValue={this.state.defaultNumSize} />
           <p>Number of reps:</p>
           <InputForm nameSuffix="_RepCount" onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
@@ -306,9 +488,10 @@ class PracticeScreen extends React.Component {
             <select onInput={this.setStorageTech} name="dataSource" id="dataSource" ref={this.storageTypeButton}>
               <option value={names.dropbox}>{names.dropbox}</option>
               <option value={names.browserStorage}>{names.browserStorage}</option>
+              <option value={names.digitSpanPracticeServer}>{names.digitSpanPracticeServer}</option>
             </select>
           </form>
-
+          {custonStorageControls}
           <div id="dropboxLine">
             <button id="setUpDropbox" type="button" onClick={this.setUpDropbox} >Set up Dropbox Storage</button>
             <div>{this.state.savingStatusLine}</div>
@@ -316,13 +499,13 @@ class PracticeScreen extends React.Component {
           <div id="errorConsole">
             {errorElements}
           </div>
-          <TrailCatagoryWidget appEngine={this.props.appEngine}/>
+          <TrailCatagoryWidget appEngine={appEngine}/>
 
           <Link to="/about">About this task</Link>
         </div>
         <div id="scoreChart">
-          <ScoreChart performenceRecord={this.props.appEngine.getPerformanceRecord()} 
-          currentCatagory={this.props.appEngine.getCurrentCatagory()} />
+          <ScoreChart performenceRecord={appEngine.getPerformanceRecord()} 
+          currentCatagory={appEngine.getCurrentCatagory()} />
         </div>
       </>
     );

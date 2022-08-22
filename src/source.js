@@ -98,6 +98,7 @@ class AppEngine {
         this.guiController = guiController;
         this.performanceRecord = new PerformanceRecord();
         this.dropboxStorage = new DropboxStorage(guiController);
+        this.customStorage = new CustomStorage();
         this.longTermStorage = this.dropboxStorage;
         this.trailCatagoryArray = [];
         this.currentCatagory = names.noCatagory;
@@ -109,6 +110,10 @@ class AppEngine {
 
     getPerformanceRecord() {
         return this.performanceRecord;
+    }
+
+    getCustomStorage() {
+        return this.customStorage;
     }
 
     getGuiController() {
@@ -172,6 +177,8 @@ class AppEngine {
             this.switchToBrowserStorage();
         } else if (localStorage.storageType === names.dropbox) {
             this.switchToDropboxStorage();
+        } else if (localStorage.storageType === names.digitSpanPracticeServer) {
+            this.switchToCustomStorage();
         }
 
         await this.loadLongTermStorage();
@@ -253,6 +260,16 @@ class AppEngine {
         this.guiController.setStorageTypeButton(names.browserStorage);
         this.longTermStorage = new BrowserStorage();
     }
+
+    switchToCustomStorage() {
+        localStorage.setItem("storageType", names.digitSpanPracticeServer);
+        this.guiController.setStorageTypeButton(names.digitSpanPracticeServer);
+        this.longTermStorage = new CustomStorage();
+    }
+
+    isUsingCustomStorage() {
+        return localStorage.getItem("storageType") === names.digitSpanPracticeServer;
+    };
 
     async saveEverything() {
         try {
@@ -452,7 +469,7 @@ class DropboxStorage {
             //When the file does not exist, a error message is written to the firefox console ("409 Conflict"), consider checking if the file exist using "filesListFolder(arg)", see https://stackoverflow.com/questions/58289223/checking-file-existence-dropbox-api-v2
             var ans = await this.dbx.filesDownload(args);
         } catch (e) {
-            if (e.error && e.error.error_summary && 
+            if (e.error && e.error.error_summary &&
                 e.error.error_summary.substring(0, 15) === "path/not_found/") {
                 this.guiController.setSavingStatusLine(infoNotFoundMsg);
                 return null;
@@ -545,7 +562,126 @@ class DropboxStorage {
         await this.dbx.filesUpload(args);
         this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
     }
+}
 
+class CustomStorage {
+    getServerUrl() {
+        return 'http://localhost:6001';
+    }
+    getAccessToken() {
+        return window.localStorage.getItem("customAccessToken");
+    }
+
+    setAccessToken(accessToken) {
+        window.localStorage.setItem("customAccessToken", accessToken);
+    }
+
+    async makeRequest (method, requestHeader,requestBody){
+        if (this.getAccessToken() == null) {
+            return null;
+        }
+        var options = {method: method};
+        if (requestHeader) {
+            options.headers = requestHeader;
+        }
+        if (requestBody) {
+            options.body = JSON.stringify(requestBody);
+        }
+        const myRequest = new Request(this.getServerUrl(),
+        options);
+
+        const responseJson = await fetch(myRequest)
+        .then((response) => {
+            if (!response.ok && response.status !== 404) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+
+            return response.json();
+
+        }).catch(error => {
+            console.error(error);
+        });
+
+        return responseJson;
+    }
+
+    async loadPerfRecord() {
+        var performanceRecord = new PerformanceRecord();
+
+        var requestHeader = {
+            requestType: "getPerformanceRecord",
+            accessToken: this.getAccessToken(),
+        }
+
+        const responseJson = await this.makeRequest("GET",requestHeader);
+
+        if ( responseJson != null && responseJson.performanceRecord) {
+            performanceRecord.populateFromJson(responseJson.performanceRecord);
+        }
+        return performanceRecord;
+    }
+
+    async savePerfRecord(performanceRecord) {
+
+        var requestBody = {
+            requestType: "setPerformanceRecord",
+            accessToken: this.getAccessToken(),
+            performanceRecord: performanceRecord,
+        }
+
+        this.makeRequest("POST",null,requestBody);
+    }
+
+    saveTrailCatagories(catagoriesArray) {
+        var jsonString = JSON.stringify(catagoriesArray);
+
+        var requestBody = {
+            requestType: "saveTrailCatagories",
+            accessToken: this.getAccessToken(),
+            catagoriesArray: jsonString,
+        }
+        this.makeRequest("POST",null,requestBody);
+    }
+
+    saveCurrentCatagory(currentCatagory) {
+        var requestBody = {
+            requestType: "saveCurrentCatagory",
+            accessToken: this.getAccessToken(),
+            currentCatagory: currentCatagory,
+        }
+        this.makeRequest("POST",null,requestBody);
+    }
+
+    async loadCurrentCatagory() { 
+        var requestHeader = {
+            requestType: "getCurrentCatagory",
+            accessToken: this.getAccessToken(),
+        }
+
+        const responseJson = await this.makeRequest("GET",requestHeader);
+
+        if (responseJson == null) {
+            return names.noCatagory;
+        } else {
+            return responseJson.currentCatagory;
+        }
+
+    }
+
+    async loadCatagoryArray() {
+        var requestHeader = {
+            requestType: "getTrailCatagories",
+            accessToken: this.getAccessToken(),
+        }
+
+        const responseJson = await this.makeRequest("GET",requestHeader);
+
+        if (responseJson == null || responseJson.catagoriesArray == null) {
+            return [];
+        } else {
+            return JSON.parse(responseJson.catagoriesArray);
+        }
+    }
 }
 
 class HtmlPureGui {

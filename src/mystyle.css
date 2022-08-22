@@ -1,3 +1,6 @@
+/*TODO: using px instead of cm is probably a better idea, because css pixels are relative to the 
+type and size of the screen*/
+
 #mainTerminal {
     float: left;
     background-color: "green";
@@ -28,6 +31,12 @@
     margin-bottom: 0.5cm;
     display: flex;
     color: green;
+}
+
+#CustomStorageControls {
+    display: flex;
+    margin-top: 0.5cm;
+    margin-bottom: 0.5cm;
 }
 
 #catagoryDisplayLine {
