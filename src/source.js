@@ -98,7 +98,7 @@ class AppEngine {
         this.guiController = guiController;
         this.performanceRecord = new PerformanceRecord();
         this.dropboxStorage = new DropboxStorage(guiController);
-        this.customStorage = new CustomStorage();
+        this.customStorage = new CustomStorage(guiController);
         this.longTermStorage = this.dropboxStorage;
         this.trailCatagoryArray = [];
         this.currentCatagory = names.noCatagory;
@@ -264,7 +264,7 @@ class AppEngine {
     switchToCustomStorage() {
         localStorage.setItem("storageType", names.digitSpanPracticeServer);
         this.guiController.setStorageTypeButton(names.digitSpanPracticeServer);
-        this.longTermStorage = new CustomStorage();
+        this.longTermStorage = this.customStorage;
     }
 
     isUsingCustomStorage() {
@@ -565,15 +565,45 @@ class DropboxStorage {
 }
 
 class CustomStorage {
+    constructor(guiController) {
+        this.guiController = guiController;
+    }
+
     getServerUrl() {
         return 'http://localhost:6001';
     }
     getAccessToken() {
-        return window.localStorage.getItem("customAccessToken");
+        return window.localStorage.getItem(CustomStorage.getAccessTokenKey());
     }
 
     setAccessToken(accessToken) {
-        window.localStorage.setItem("customAccessToken", accessToken);
+        window.localStorage.setItem(CustomStorage.getAccessTokenKey(), accessToken);
+    }
+
+    static getAccessTokenKey() {
+        return "customAccessToken";
+    }
+
+    static getUserNameKey() {
+        return "userNameKey";
+    }
+
+    isLoggedIn() {
+       return this.getUserName() != null;
+    }
+
+    logout() {
+        window.localStorage.removeItem(CustomStorage.getAccessTokenKey());
+        window.localStorage.removeItem(CustomStorage.getUserNameKey());
+        this.guiController.updateGUI();
+    }
+
+    getUserName() {
+        return window.localStorage.getItem(CustomStorage.getUserNameKey());
+    }
+
+    setUserName(userName) {
+        window.localStorage.setItem(CustomStorage.getUserNameKey(), userName);
     }
 
     async makeRequest (method, requestHeader,requestBody){

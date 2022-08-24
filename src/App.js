@@ -34,9 +34,9 @@ class InputForm extends React.Component {
   render() {
     return (
       <form name={"form" + this.props.nameSuffix} onSubmit={this.onSubmit} >
-        <input name={"input" + this.props.nameSuffix} type={this.props.inputType} 
-        onChange={this.handleChange} defaultValue={this.props.defaultValue}
-         ref={(input) => { this.nameInput = input; }} />
+        <input name={"input" + this.props.nameSuffix} type={this.props.inputType}
+          onChange={this.handleChange} defaultValue={this.props.defaultValue}
+          ref={(input) => { this.nameInput = input; }} />
       </form>
     );
   }
@@ -68,7 +68,7 @@ class SignUpPage extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {userNameValue: "" , passwordValue: ""};
+    this.state = { userNameValue: "", passwordValue: "" };
   }
 
   setUserName = (userNameValue) => {
@@ -82,11 +82,11 @@ class SignUpPage extends React.Component {
 
   tryToSignUp = (event) => {
     event.preventDefault();
-    if (this.state.userNameValue === ''){
+    if (this.state.userNameValue === '') {
       alert("Please enter a user name before siging up");
       return;
     }
-    if (this.state.passwordValue === ''){
+    if (this.state.passwordValue === '') {
       alert("Please enter a password before siging up");
       return;
     }
@@ -97,17 +97,17 @@ class SignUpPage extends React.Component {
     }
     var customStorage = this.props.appEngine.getCustomStorage();
     const myRequest = new Request(customStorage.getServerUrl(),
-    {method: "POST",body: JSON.stringify(requestBody)});
+      { method: "POST", body: JSON.stringify(requestBody) });
     fetch(myRequest)
       .then((response) => {
         if (!response.ok && response.status !== 409) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        response.json().then(function(json) {
+        response.json().then(function (json) {
           alert(json.resultStr);
         });
-    
+
       }).catch(error => {
         console.error(error);
       });
@@ -115,18 +115,18 @@ class SignUpPage extends React.Component {
   }
 
   render() {
-    var divStyle = {display: "grid", gridTemplateColumns: "100px"}
+    var divStyle = { display: "grid", gridTemplateColumns: "100px" }
     return (
       <>
         <div style={divStyle}>
-        <p>User Name:</p>
-        <InputForm nameSuffix="_userNameForSignUp" onChange={this.setUserName}  />
-        <p>Password</p>
-        <InputForm nameSuffix="_passwordForSignUp" onChange={this.setPassword} 
-        inputType="password"  />
-        <input type="submit" value="Sign up" onClick={this.tryToSignUp}/>
+          <p>User Name:</p>
+          <InputForm nameSuffix="_userNameForSignUp" onChange={this.setUserName} />
+          <p>Password</p>
+          <InputForm nameSuffix="_passwordForSignUp" onChange={this.setPassword}
+            inputType="password" />
+          <input type="submit" value="Sign up" onClick={this.tryToSignUp} />
 
-        <Link to="/">Back to main screen</Link>
+          <Link to="/">Back to main screen</Link>
         </div>
       </>
     )
@@ -137,7 +137,7 @@ class LoginPage extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {userNameValue: "" , passwordValue: ""};
+    this.state = { userNameValue: "", passwordValue: "" };
   }
 
   setUserName = (userNameValue) => {
@@ -151,11 +151,11 @@ class LoginPage extends React.Component {
 
   tryTologin = (event) => {
     event.preventDefault();
-    if (this.state.userNameValue === ''){
+    if (this.state.userNameValue === '') {
       alert("Please enter a user name before logging in");
       return;
     }
-    if (this.state.passwordValue === ''){
+    if (this.state.passwordValue === '') {
       alert("Please enter a password before logging in");
       return;
     }
@@ -165,21 +165,23 @@ class LoginPage extends React.Component {
       password: this.state.passwordValue
     }
     var customStorage = this.props.appEngine.getCustomStorage();
+    var userName = this.state.userNameValue;
     const myRequest = new Request(customStorage.getServerUrl(),
-    {method: "POST",body: JSON.stringify(requestBody)});
+      { method: "POST", body: JSON.stringify(requestBody) });
     fetch(myRequest)
       .then((response) => {
         if (!response.ok && response.status !== 404) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
-        response.json().then(function(json) {
+        response.json().then(function (json) {
           alert(json.resultStr);
-          if (json.resultStr === "Login Successful"){
+          if (json.resultStr === "Login Successful") {
             customStorage.setAccessToken(json.accessToken);
-          } ;
+            customStorage.setUserName(userName);
+          };
         });
-    
+
       }).catch(error => {
         console.error(error);
       });
@@ -187,18 +189,18 @@ class LoginPage extends React.Component {
   }
 
   render() {
-    var divStyle = {display: "grid", gridTemplateColumns: "100px"}
+    var divStyle = { display: "grid", gridTemplateColumns: "100px" }
     return (
       <>
         <div style={divStyle}>
-        <p>User Name:</p>
-        <InputForm nameSuffix="_userNameForLogin" onChange={this.setUserName}  />
-        <p>Password</p>
-        <InputForm nameSuffix="_passwordForLogin" onChange={this.setPassword} 
-        inputType="password"  />
-        <input type="submit" value="log in" onClick={this.tryTologin}/>
+          <p>User Name:</p>
+          <InputForm nameSuffix="_userNameForLogin" onChange={this.setUserName} />
+          <p>Password</p>
+          <InputForm nameSuffix="_passwordForLogin" onChange={this.setPassword}
+            inputType="password" />
+          <input type="submit" value="log in" onClick={this.tryTologin} />
 
-        <Link to="/">Back to main screen</Link>
+          <Link to="/">Back to main screen</Link>
         </div>
       </>
     )
@@ -214,8 +216,8 @@ class App extends React.Component {
         <Routes>
           <Route path="/" element={<PracticeScreen appEngine={this.props.appEngine} />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/signup" element={<SignUpPage appEngine={this.props.appEngine}/>} />
-          <Route path="/login" element={<LoginPage appEngine={this.props.appEngine}/>} />
+          <Route path="/signup" element={<SignUpPage appEngine={this.props.appEngine} />} />
+          <Route path="/login" element={<LoginPage appEngine={this.props.appEngine} />} />
 
         </Routes>
       </Router>)
@@ -227,8 +229,8 @@ class TrailCatagoryWidget extends React.Component {
     super(props);
     this.catagorySelectMenu = React.createRef();
     this.catagoryRemoveMenu = React.createRef();
-    this.state = {catagoryNamesArray: []};
-    this.catagoryWasAdded=false;
+    this.state = { catagoryNamesArray: [] };
+    this.catagoryWasAdded = false;
   }
 
   async componentDidMount() {
@@ -272,10 +274,10 @@ class TrailCatagoryWidget extends React.Component {
     this.props.appEngine.switchToCatagory(name);
   }
 
-  componentDidUpdate(){
-    if(this.catagoryWasAdded){
+  componentDidUpdate() {
+    if (this.catagoryWasAdded) {
       var catagorySelectMenu = this.catagorySelectMenu.current;
-      catagorySelectMenu.selectedIndex = catagorySelectMenu.length-1;
+      catagorySelectMenu.selectedIndex = catagorySelectMenu.length - 1;
       this.catagoryWasAdded = false;
     }
   }
@@ -302,7 +304,7 @@ class TrailCatagoryWidget extends React.Component {
       <form>
         <label htmlFor="catagoryRemove">Remove catagory:   </label>
         <select name="catagoryRemove" id="catagoryRemove" ref={this.catagoryRemoveMenu}>
-        {options}
+          {options}
         </select>
         <input onClick={this.removeCatagory} type="submit" value="remove" />
       </form>
@@ -312,6 +314,7 @@ class TrailCatagoryWidget extends React.Component {
 }
 
 class CustomStorageControls extends React.Component {
+
   signUp = () => {
     window.location.href = '/signup';
   }
@@ -320,14 +323,30 @@ class CustomStorageControls extends React.Component {
     window.location.href = '/login';
   }
 
+  logout = () => {
+    this.props.customStorage.logout();
+  }
 
   render() {
-    return (
-      <div id="CustomStorageControls">
-      <button id="signIn" type="button" onClick={this.login} >Log In</button>
-      <button id="login" type="button" onClick={this.signUp} >Sign Up</button>
+    var customStorage = this.props.customStorage;
+    var elementToRender;
+    if (customStorage.isLoggedIn()) {
+      elementToRender = <div className="CustomStorageControls">
+        <label>logged in as: {customStorage.getUserName()} </label>
+        <button id="logout" type="button" onClick={this.logout} >
+          Log out</button>
       </div>
-      )
+    } else {
+      elementToRender = <div className="CustomStorageControls">
+        <button id="signIn" type="button" onClick={this.login} >Log In</button>
+        <button id="login" type="button" onClick={this.signUp} >Sign Up</button>
+      </div>;
+    }
+    return (
+      <>
+        {elementToRender}
+      </>
+    )
   }
 }
 
@@ -335,8 +354,10 @@ class PracticeScreen extends React.Component {
   constructor(props) {
     super(props);
     console.log("Starting digit span practice app");
-    this.state = { numToRecall: '12345', isInputMode: true, savingStatusLine: "",
-    isUsingCustomStorage: this.props.appEngine.isUsingCustomStorage() };
+    this.state = {
+      numToRecall: '12345', isInputMode: true, savingStatusLine: "",
+      isUsingCustomStorage: this.props.appEngine.isUsingCustomStorage()
+    };
     this.requestAccessCode = false;
     this.startButton = React.createRef();
     this.saveSettingButton = React.createRef();
@@ -400,7 +421,7 @@ class PracticeScreen extends React.Component {
     this.AdjustDisableStatus();
   }
 
-   setStorageTech = async (event) => {
+  setStorageTech = async (event) => {
     var appEngine = this.props.appEngine;
     var sourceToSwitchTo = event.target.value;
     if (names.browserStorage === sourceToSwitchTo) {
@@ -454,9 +475,9 @@ class PracticeScreen extends React.Component {
     var mainDisplay;
     var appEngine = this.props.appEngine;
     var custonStorageControls = "";
-    if(this.state.isUsingCustomStorage) {
-      custonStorageControls = <CustomStorageControls/>
-    } 
+    if (this.state.isUsingCustomStorage) {
+      custonStorageControls = <CustomStorageControls customStorage={appEngine.getCustomStorage()} />
+    }
     if (this.state.isInputMode) {
       mainDisplay = <InputForm nameSuffix="_Digits" focusOnStart onSubmit={this.checkAnswer} />;
     } else {
@@ -499,13 +520,13 @@ class PracticeScreen extends React.Component {
           <div id="errorConsole">
             {errorElements}
           </div>
-          <TrailCatagoryWidget appEngine={appEngine}/>
+          <TrailCatagoryWidget appEngine={appEngine} />
 
           <Link to="/about">About this task</Link>
         </div>
         <div id="scoreChart">
-          <ScoreChart performenceRecord={appEngine.getPerformanceRecord()} 
-          currentCatagory={appEngine.getCurrentCatagory()} />
+          <ScoreChart performenceRecord={appEngine.getPerformanceRecord()}
+            currentCatagory={appEngine.getCurrentCatagory()} />
         </div>
       </>
     );

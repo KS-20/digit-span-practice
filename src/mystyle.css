@@ -33,7 +33,7 @@ type and size of the screen*/
     color: green;
 }
 
-#CustomStorageControls {
+.CustomStorageControls {
     display: flex;
     margin-top: 0.5cm;
     margin-bottom: 0.5cm;
@@ -41,4 +41,8 @@ type and size of the screen*/
 
 #catagoryDisplayLine {
     margin-left: 40px;
+}
+
+#logout {
+    margin-left: 10px;
 }

@@ -247,6 +247,7 @@ async function logInUser(requestObject, headers, res) {
         const hashedPassword = result[0].HashedPassword;
         if (await bcrypt.compare(password, hashedPassword)) {
           const token = generateAccessToken({ userName: userName });
+          //maybe use specially configured cookies for better security, see: https://www.rdegges.com/2018/please-stop-using-local-storage/
           const answerObj = { resultStr: "Login Successful", accessToken: token };
           res.writeHead(200, headers);
           res.end(JSON.stringify(answerObj));
