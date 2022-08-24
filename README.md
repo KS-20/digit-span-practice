@@ -13,3 +13,15 @@ install npm packages:
 Run the server:
 
 > npm start
+
+Running selenium based gui test:
+
+> node src/gui_test.js
+
+To run custom storage server , make sure mysql is running , set the needed environment variables in the .env file and execute:
+
+>npm run productionserverstart
+
+to kill it:
+
+>pm2 kill
