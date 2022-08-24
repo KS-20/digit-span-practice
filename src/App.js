@@ -179,6 +179,7 @@ class LoginPage extends React.Component {
           if (json.resultStr === "Login Successful") {
             customStorage.setAccessToken(json.accessToken);
             customStorage.setUserName(userName);
+            window.location.href = '/';
           };
         });
 
