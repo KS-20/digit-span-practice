@@ -82,36 +82,45 @@ class SignUpPage extends React.Component {
 
   tryToSignUp = (event) => {
     event.preventDefault();
-    if (this.state.userNameValue === '') {
+    const userNameValue = this.state.userNameValue;
+    const passwordValue = this.state.passwordValue;
+    if (userNameValue === '') {
       alert("Please enter a user name before siging up");
       return;
     }
-    if (this.state.passwordValue === '') {
+    if (passwordValue === '') {
       alert("Please enter a password before siging up");
       return;
     }
     var requestBody = {
       requestType: "signup",
-      userName: this.state.userNameValue,
-      password: this.state.passwordValue
+      userName: userNameValue,
+      password: passwordValue
     }
     var customStorage = this.props.appEngine.getCustomStorage();
     const myRequest = new Request(customStorage.getServerUrl(),
       { method: "POST", body: JSON.stringify(requestBody) });
+    var processSignUpResult = this.genSignUpHelper(customStorage , userNameValue , passwordValue);
     fetch(myRequest)
-      .then((response) => {
-        if (!response.ok && response.status !== 409) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        response.json().then(function (json) {
-          alert(json.resultStr);
-        });
-
-      }).catch(error => {
+      .then(processSignUpResult).catch(error => {
         console.error(error);
       });
 
+  }
+
+  genSignUpHelper(customStorage,userName,password) {
+    return (response) => {
+      if (!response.ok && response.status !== 409) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      response.json().then(function (json) {
+        alert(json.resultStr);
+        if( json.resultStr == "Created new User" ){
+          customStorage.logIn(userName,password,false);
+        }
+      });
+    }
   }
 
   render() {
@@ -159,34 +168,8 @@ class LoginPage extends React.Component {
       alert("Please enter a password before logging in");
       return;
     }
-    var requestBody = {
-      requestType: "login",
-      userName: this.state.userNameValue,
-      password: this.state.passwordValue
-    }
     var customStorage = this.props.appEngine.getCustomStorage();
-    var userName = this.state.userNameValue;
-    const myRequest = new Request(customStorage.getServerUrl(),
-      { method: "POST", body: JSON.stringify(requestBody) });
-    fetch(myRequest)
-      .then((response) => {
-        if (!response.ok && response.status !== 404) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-        response.json().then(function (json) {
-          alert(json.resultStr);
-          if (json.resultStr === "Login Successful") {
-            customStorage.setAccessToken(json.accessToken);
-            customStorage.setUserName(userName);
-            window.location.href = '/';
-          };
-        });
-
-      }).catch(error => {
-        console.error(error);
-      });
-
+    customStorage.logIn(this.state.userNameValue, this.state.passwordValue);
   }
 
   render() {

@@ -569,6 +569,37 @@ class CustomStorage {
         this.guiController = guiController;
     }
 
+    logIn(userName, password, reportLogin = true) {
+        var requestBody = {
+            requestType: "login",
+            userName: userName,
+            password: password
+        }
+        var customStorage = this;
+        const myRequest = new Request(customStorage.getServerUrl(),
+            { method: "POST", body: JSON.stringify(requestBody) });
+        fetch(myRequest)
+            .then((response) => {
+                if (!response.ok && response.status !== 404) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                response.json().then(function (json) {
+                    if (reportLogin) {
+                        customStorage.guiController.popUpMessage(json.resultStr);
+                    }
+                    if (json.resultStr === "Login Successful") {
+                        customStorage.setAccessToken(json.accessToken);
+                        customStorage.setUserName(userName);
+                        customStorage.guiController.goToMainScreen();
+                    };
+                });
+
+            }).catch(error => {
+                console.error(error);
+            });
+    }
+
     getServerUrl() {
         return 'http://localhost:6001';
     }
@@ -589,7 +620,7 @@ class CustomStorage {
     }
 
     isLoggedIn() {
-       return this.getUserName() != null;
+        return this.getUserName() != null;
     }
 
     logout() {
@@ -606,11 +637,11 @@ class CustomStorage {
         window.localStorage.setItem(CustomStorage.getUserNameKey(), userName);
     }
 
-    async makeRequest (method, requestHeader,requestBody){
+    async makeRequest(method, requestHeader, requestBody) {
         if (this.getAccessToken() == null) {
             return null;
         }
-        var options = {method: method};
+        var options = { method: method };
         if (requestHeader) {
             options.headers = requestHeader;
         }
@@ -618,19 +649,19 @@ class CustomStorage {
             options.body = JSON.stringify(requestBody);
         }
         const myRequest = new Request(this.getServerUrl(),
-        options);
+            options);
 
         const responseJson = await fetch(myRequest)
-        .then((response) => {
-            if (!response.ok && response.status !== 404) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
+            .then((response) => {
+                if (!response.ok && response.status !== 404) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
 
-            return response.json();
+                return response.json();
 
-        }).catch(error => {
-            console.error(error);
-        });
+            }).catch(error => {
+                console.error(error);
+            });
 
         return responseJson;
     }
@@ -643,9 +674,9 @@ class CustomStorage {
             accessToken: this.getAccessToken(),
         }
 
-        const responseJson = await this.makeRequest("GET",requestHeader);
+        const responseJson = await this.makeRequest("GET", requestHeader);
 
-        if ( responseJson != null && responseJson.performanceRecord) {
+        if (responseJson != null && responseJson.performanceRecord) {
             performanceRecord.populateFromJson(responseJson.performanceRecord);
         }
         return performanceRecord;
@@ -659,7 +690,7 @@ class CustomStorage {
             performanceRecord: performanceRecord,
         }
 
-        this.makeRequest("POST",null,requestBody);
+        this.makeRequest("POST", null, requestBody);
     }
 
     saveTrailCatagories(catagoriesArray) {
@@ -670,7 +701,7 @@ class CustomStorage {
             accessToken: this.getAccessToken(),
             catagoriesArray: jsonString,
         }
-        this.makeRequest("POST",null,requestBody);
+        this.makeRequest("POST", null, requestBody);
     }
 
     saveCurrentCatagory(currentCatagory) {
@@ -679,16 +710,16 @@ class CustomStorage {
             accessToken: this.getAccessToken(),
             currentCatagory: currentCatagory,
         }
-        this.makeRequest("POST",null,requestBody);
+        this.makeRequest("POST", null, requestBody);
     }
 
-    async loadCurrentCatagory() { 
+    async loadCurrentCatagory() {
         var requestHeader = {
             requestType: "getCurrentCatagory",
             accessToken: this.getAccessToken(),
         }
 
-        const responseJson = await this.makeRequest("GET",requestHeader);
+        const responseJson = await this.makeRequest("GET", requestHeader);
 
         if (responseJson == null) {
             return names.noCatagory;
@@ -704,7 +735,7 @@ class CustomStorage {
             accessToken: this.getAccessToken(),
         }
 
-        const responseJson = await this.makeRequest("GET",requestHeader);
+        const responseJson = await this.makeRequest("GET", requestHeader);
 
         if (responseJson == null || responseJson.catagoriesArray == null) {
             return [];
@@ -855,6 +886,14 @@ class ReactGui {
 
     updateGUI() {
         this.appComponent.forceUpdate();
+    }
+
+    popUpMessage(msg) {
+        alert(msg);
+    }
+
+    goToMainScreen() {
+        window.location.href = '/';
     }
 }
 
