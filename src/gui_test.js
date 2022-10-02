@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-const path = require('path');
-require('dotenv').config();
+import path from  "path";
+import 'dotenv/config';
 var pathToWebDriver = process.env['FIREFOX_DRIVER_DIR'];
 process.env['PATH'] = process.env['PATH']+ path.delimiter+pathToWebDriver;
 
-const {Builder, By, Key, until} = require('selenium-webdriver');
+import {Builder, By, Key, until} from 'selenium-webdriver';
 
 function assert(result){
   if (!result) {
@@ -31,7 +31,7 @@ function assert(result){
     await driver.findElement(By.id("startPractice")).click()
 
     await driver.wait(until.elementLocated(By.id('numConsole')), 10 * 1000)
-    textToRemember = await driver.findElement(By.id('numConsole')).getText();
+    var textToRemember = await driver.findElement(By.id('numConsole')).getText();
 
     await driver.wait(until.elementLocated(By.name('input_Digits')), 10 * 1000)
 
