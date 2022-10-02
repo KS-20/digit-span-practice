@@ -1,9 +1,11 @@
-const http = require('http');
+import http from "http";
 const port = 6001;
-const bcrypt = require("bcrypt")
-const mysql = require('mysql2');
-require("dotenv").config();
-const jwt = require("jsonwebtoken");
+import bcrypt from "bcrypt";
+import mysql from "mysql2";
+
+import 'dotenv/config';
+import jwt from "jsonwebtoken";
+import { serverMsgs } from '../repeatedStrings.js'
 
 const DB_HOST = process.env.DB_HOST
 const DB_USER = process.env.DB_USER
@@ -63,7 +65,7 @@ http.createServer(async (req, res) => {
         decodedToken = jwt.verify(accessToken, process.env.ACCESS_TOKEN_SECRET);
       } catch (e) {
         if (e.message === "jwt expired") {
-          const answerObj = { resultStr: "Access token expired" };
+          const answerObj = { resultStr: serverMsgs.accessTokenExpired };
           res.writeHead(200, headers);
           res.end(JSON.stringify(answerObj));
           return

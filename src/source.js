@@ -1,7 +1,6 @@
 // for reference: https://timodenk.com/blog/digit-span-test-online-tool/
-import { names } from './names.js'
-const Dropbox = require("dropbox")
-
+import { names, serverMsgs} from './repeatedStrings.js'
+import {Dropbox,DropboxAuth,DropboxResponseError} from "dropbox"
 
 class SetRecord {
     constructor() {
@@ -210,7 +209,7 @@ class AppEngine {
     }
 
     processException(e) {
-        if (e instanceof Dropbox.DropboxResponseError) {
+        if (e instanceof DropboxResponseError) {
             let errorMsg = "error detected: \n" + e.toString() + "\n";
             if (e.error && e.error.error_summary === "expired_access_token/...") {
                 errorMsg += "Dropbox access token has expired, suggested resolution: try to reauthenticate \n";
@@ -389,7 +388,7 @@ class DropboxStorage {
     constructor(guiController) {
         this.redirectUri = '';
         var CLIENT_ID = 'y9rc6q1jk1bg8lx';
-        this.dbxAuth = new Dropbox.DropboxAuth({
+        this.dbxAuth = new DropboxAuth({
             clientId: CLIENT_ID,
         });
         this.guiController = guiController;
@@ -518,7 +517,7 @@ class DropboxStorage {
                 window.localStorage.setItem("refreshToken", refreshToken);
                 this.dbxAuth.setAccessToken(accessToken);
                 this.dbxAuth.setRefreshToken(refreshToken);
-                this.dbx = new Dropbox.Dropbox({
+                this.dbx = new Dropbox({
                     auth: this.dbxAuth
                 });
             })
@@ -540,7 +539,7 @@ class DropboxStorage {
         this.dbxAuth.setCodeVerifier(codeVerifier);
         this.dbxAuth.setAccessToken(accessToken);
         this.dbxAuth.setRefreshToken(refreshToken);
-        this.dbx = new Dropbox.Dropbox({
+        this.dbx = new Dropbox({
             auth: this.dbxAuth
         });
     }
@@ -652,12 +651,15 @@ class CustomStorage {
             options);
 
         const responseJson = await fetch(myRequest)
-            .then((response) => {
+            .then(async (response) => {
                 if (!response.ok && response.status !== 404) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-
-                return response.json();
+                const json = await response.json();
+                if (json.resultStr === serverMsgs.accessTokenExpired) {
+                    this.logout();
+                }
+                return json;
 
             }).catch(error => {
                 console.error(error);
@@ -673,7 +675,6 @@ class CustomStorage {
             requestType: "getPerformanceRecord",
             accessToken: this.getAccessToken(),
         }
-
         const responseJson = await this.makeRequest("GET", requestHeader);
 
         if (responseJson != null && responseJson.performanceRecord) {

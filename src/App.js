@@ -1,7 +1,7 @@
 import React from 'react';
 import ScoreChart from './scoreChart.js'
 import './mystyle.css'
-import { names } from './names.js'
+import { names } from './repeatedStrings.js'
 import {
   BrowserRouter as Router,
   Routes,
@@ -116,7 +116,7 @@ class SignUpPage extends React.Component {
 
       response.json().then(function (json) {
         alert(json.resultStr);
-        if( json.resultStr == "Created new User" ){
+        if( json.resultStr === "Created new User" ){
           customStorage.logIn(userName,password,false);
         }
       });

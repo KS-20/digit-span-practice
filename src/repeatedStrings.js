@@ -6,4 +6,8 @@ const names = {
     digitSpanPracticeServer: "Digit Span Practice Server"
 }
 
-export {names};
+const serverMsgs = {
+    accessTokenExpired: "Access token expired"
+}
+
+export {names,serverMsgs};
