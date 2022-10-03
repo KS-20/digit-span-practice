@@ -721,8 +721,7 @@ class CustomStorage {
         }
 
         const responseJson = await this.makeRequest("GET", requestHeader);
-
-        if (responseJson == null) {
+        if (responseJson == null || responseJson.currentCatagory == null) {
             return names.noCatagory;
         } else {
             return responseJson.currentCatagory;
