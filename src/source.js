@@ -304,6 +304,7 @@ class AppEngine {
     switchToCatagory(name) {
         this.currentCatagory = name;
         this.longTermStorage.saveCurrentCatagory(name);
+        this.guiController.updateGUI();
     }
 
     getTrailCatagories() {
