@@ -1,6 +1,6 @@
 // for reference: https://timodenk.com/blog/digit-span-test-online-tool/
-import { names, serverMsgs} from './repeatedStrings.js'
-import {Dropbox,DropboxAuth,DropboxResponseError} from "dropbox"
+import { names, serverMsgs } from './repeatedStrings.js'
+import { Dropbox, DropboxAuth, DropboxResponseError } from "dropbox"
 
 class SetRecord {
     constructor() {
@@ -793,7 +793,9 @@ class ReactGui {
     addTrailCatagory(name) {
         this.catagoryComponent.setState((state, props) => {
             var newArray = [...state.catagoryNamesArray]; //copy array because setState runs twice under <React.StrictMode>
-            newArray.push(name);
+            if (!newArray.includes(name)) { // loadCatagoryData runs twice under <React.StrictMode>
+                newArray.push(name);
+            }
             var result = { catagoryNamesArray: newArray };
             return result;
         });
