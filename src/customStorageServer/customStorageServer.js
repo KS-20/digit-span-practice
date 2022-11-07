@@ -5,7 +5,7 @@ import mysql from "mysql2";
 
 import 'dotenv/config';
 import jwt from "jsonwebtoken";
-import { serverMsgs } from '../repeatedStrings.js'
+import { serverMsgs,dbColumnNames } from '../repeatedStrings.js'
 
 const DB_HOST = process.env.DB_HOST
 const DB_USER = process.env.DB_USER
@@ -24,6 +24,25 @@ const db = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0
 })
+
+let databaseSizeLimits = new Map();
+
+async function readDataSizeLimits() {
+  console.log("Reading database constraints for checking input size limits")
+  const promisePool = db.promise();
+  const sqlSearch = `select COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH 
+    from information_schema.columns
+    where table_schema = DATABASE() AND
+          table_name = 'users' AND 
+          COLUMN_NAME = ? 
+    `
+  for (const columnName in dbColumnNames) {
+    const [rows,fields] = await promisePool.query(sqlSearch,[dbColumnNames[columnName]]);
+    databaseSizeLimits.set(rows[0].COLUMN_NAME,rows[0].CHARACTER_MAXIMUM_LENGTH);
+  }
+}
+
+await readDataSizeLimits();
 
 http.createServer(async (req, res) => {
   const headers = {
@@ -70,7 +89,7 @@ http.createServer(async (req, res) => {
           res.end(JSON.stringify(answerObj));
           return
         } else {
-          const answerObj = { resultStr: "Error verifying jwt, error message: "+e.message };
+          const answerObj = { resultStr: "Error verifying jwt, error message: " + e.message };
           res.writeHead(400, headers);
           res.end(JSON.stringify(answerObj));
           return
@@ -84,7 +103,6 @@ http.createServer(async (req, res) => {
     } else if (req.headers.requesttype !== undefined) {
       requestType = req.headers.requesttype;
     }
-
     if (requestObject != undefined) {
       if (requestType == "signup") {
         await signUpUser(requestObject, headers, res);
@@ -115,10 +133,21 @@ http.createServer(async (req, res) => {
 }).listen(port);
 
 function saveTrailCatagories(decodedToken, requestObject, headers, res) {
+  const catagoriesSizeLimit = databaseSizeLimits.get(dbColumnNames.trailCatagories);
+
+  const catagoriesArray = requestObject.catagoriesArray;
+  if( catagoriesArray.length > catagoriesSizeLimit ) {
+    const answerObj = { resultStr: "Catagories data exceeds the maximum size of "+catagoriesSizeLimit+" characters" };
+    res.writeHead(409, headers);
+    res.end(JSON.stringify(answerObj));
+    return;
+  }
+
+
   db.getConnection(async (err, connection) => {
     if (err) throw (err)
     const sqlSearch = "UPDATE users SET TrailCatagories = ? WHERE UserName = ?"
-    const search_query = mysql.format(sqlSearch, [requestObject.catagoriesArray, decodedToken.userName])
+    const search_query = mysql.format(sqlSearch, [catagoriesArray, decodedToken.userName])
     connection.query(search_query, async (err, result) => {
       if (err) throw (err)
       const answerObj = { resultStr: "saved trail catagories" };
@@ -132,11 +161,19 @@ function saveTrailCatagories(decodedToken, requestObject, headers, res) {
 
 
 function saveCurrentCatagory(decodedToken, requestObject, headers, res) {
+  const catagorySizeLimit = databaseSizeLimits.get(dbColumnNames.currentCatagory);
+  const currentCatagory = requestObject.currentCatagory;
+  if( currentCatagory.length > catagorySizeLimit ) {
+    const answerObj = { resultStr: "Current catagory exceeds the maximum size of "+catagorySizeLimit+" characters" };
+    res.writeHead(409, headers);
+    res.end(JSON.stringify(answerObj));
+    return;
+  }
 
   db.getConnection(async (err, connection) => {
     if (err) throw (err)
     const sqlSearch = "UPDATE users SET CurrentCatagory = ? WHERE UserName = ?"
-    const search_query = mysql.format(sqlSearch, [requestObject.currentCatagory, decodedToken.userName])
+    const search_query = mysql.format(sqlSearch, [currentCatagory, decodedToken.userName])
     connection.query(search_query, async (err, result) => {
       if (err) throw (err)
       const answerObj = { resultStr: "saved current catagory" };
@@ -207,10 +244,20 @@ function sendPerfRecord(decodedToken, headers, res) {
 
 function savePerfRecord(decodedToken, requestObject, headers, res) {
 
+  const PerfRecordSizeLimit = databaseSizeLimits.get(dbColumnNames.performanceData);
+  const performanceRecord = requestObject.performanceRecord;
+  const jsonPerfRecord = JSON.stringify(performanceRecord);
+  if( jsonPerfRecord.length > PerfRecordSizeLimit ) {
+    const answerObj = { resultStr: "Performance data exceeds the maximum size of "+PerfRecordSizeLimit+" characters" };
+    res.writeHead(409, headers);
+    res.end(JSON.stringify(answerObj));
+    return;
+  }
+
+
   db.getConnection(async (err, connection) => {
     if (err) throw (err)
     const sqlSearch = "UPDATE users SET  PerformanceData = ? WHERE UserName = ?"
-    const jsonPerfRecord = JSON.stringify(requestObject.performanceRecord);
     const search_query = mysql.format(sqlSearch, [jsonPerfRecord, decodedToken.userName])
     connection.query(search_query, async (err, result) => {
       if (err) throw (err)
@@ -257,7 +304,7 @@ async function logInUser(requestObject, headers, res) {
           const answerObj = { resultStr: "Cant log in: Password incorrect" }
           res.writeHead(200, headers);
           res.end(JSON.stringify(answerObj));
-        } 
+        }
       }
     })
   })
@@ -265,6 +312,13 @@ async function logInUser(requestObject, headers, res) {
 
 async function signUpUser(requestObject, headers, res) {
   var userName = requestObject.userName;
+  const userNameSizeLimit = databaseSizeLimits.get(dbColumnNames.userName);
+  if( userName.length > userNameSizeLimit ) {
+    const answerObj = { resultStr: "User name exceeds the maximum size of "+userNameSizeLimit+" characters" };
+    res.writeHead(409, headers);
+    res.end(JSON.stringify(answerObj));
+    return;
+  }
   var password = requestObject.password;
   //10 is the default for bcrypt.genSalt , so we will use it here
   const hashedPassword = await bcrypt.hash(password, 10); //using bcrypt with async await does not block node event loop thread.

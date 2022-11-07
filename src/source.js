@@ -653,10 +653,11 @@ class CustomStorage {
 
         const responseJson = await fetch(myRequest)
             .then(async (response) => {
+                const json = await response.json();
                 if (!response.ok && response.status !== 404) {
+                    this.guiController.popUpMessage("server error, result message: "+ json.resultStr);
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
-                const json = await response.json();
                 if (json.resultStr === serverMsgs.accessTokenExpired) {
                     this.logout();
                 }

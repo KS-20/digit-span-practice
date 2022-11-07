@@ -10,4 +10,12 @@ const serverMsgs = {
     accessTokenExpired: "Access token expired"
 }
 
-export {names,serverMsgs};
+const dbColumnNames = {
+    userName: "UserName",
+    email: "Email",
+    performanceData: "PerformanceData",
+    currentCatagory: "CurrentCatagory",
+    trailCatagories: "TrailCatagories"
+}
+
+export {names,serverMsgs,dbColumnNames};
