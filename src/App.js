@@ -100,7 +100,7 @@ class SignUpPage extends React.Component {
     var customStorage = this.props.appEngine.getCustomStorage();
     const myRequest = new Request(customStorage.getServerUrl(),
       { method: "POST", body: JSON.stringify(requestBody) });
-    var processSignUpResult = this.genSignUpHelper(customStorage , userNameValue , passwordValue);
+    var processSignUpResult = this.genSignUpHelper(customStorage, userNameValue, passwordValue);
     fetch(myRequest)
       .then(processSignUpResult).catch(error => {
         console.error(error);
@@ -108,7 +108,7 @@ class SignUpPage extends React.Component {
 
   }
 
-  genSignUpHelper(customStorage,userName,password) {
+  genSignUpHelper(customStorage, userName, password) {
     return (response) => {
       if (!response.ok && response.status !== 409) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -116,8 +116,8 @@ class SignUpPage extends React.Component {
 
       response.json().then(function (json) {
         alert(json.resultStr);
-        if( json.resultStr === "Created new User" ){
-          customStorage.logIn(userName,password,false);
+        if (json.resultStr === "Created new User") {
+          customStorage.logIn(userName, password, false);
         }
       });
     }
@@ -215,6 +215,7 @@ class TrailCatagoryWidget extends React.Component {
     this.catagoryRemoveMenu = React.createRef();
     this.state = { catagoryNamesArray: [] };
     this.catagoryWasAdded = false;
+    this.catagoryToAdd = "";
   }
 
   async componentDidMount() {
@@ -223,6 +224,10 @@ class TrailCatagoryWidget extends React.Component {
 
   addCatagory = (event) => {
     event.preventDefault();
+    if (this.catagoryToAdd == "") {
+      alert("Please enter the name of the catagory to add");
+      return;
+    }
     var catagorySelectMenu = this.catagorySelectMenu.current
     var options = catagorySelectMenu.options;
     for (var i = 0; i < catagorySelectMenu.length; ++i) {

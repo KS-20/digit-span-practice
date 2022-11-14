@@ -67,6 +67,8 @@ http.createServer(async (req, res) => {
     }
 
     const data = Buffer.concat(buffers).toString();
+
+    //todo: validate input on the server side
     var requestObject;
     if (data != "") {
       requestObject = JSON.parse(data)
