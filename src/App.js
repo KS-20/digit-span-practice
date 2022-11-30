@@ -222,12 +222,23 @@ class TrailCatagoryWidget extends React.Component {
     this.props.appEngine.getGuiController().setCatagoryComponent(this);
   }
 
-  addCatagory = (event) => {
+  addCatagory = async (event) => {
     event.preventDefault();
     if (this.catagoryToAdd == "") {
       alert("Please enter the name of the catagory to add");
       return;
     }
+    var appEngine = this.props.appEngine;
+    var longTermStorage = appEngine.getLongTermStorage();
+    if (appEngine.isUsingCustomStorage()) {
+      var catagorySizeLimit = await longTermStorage.getCatagorySizeLimit();
+      if (this.catagoryToAdd.length > catagorySizeLimit) {
+        alert("Size of current catagory must not exceed the maximum size set by the custom storage server of "
+          + catagorySizeLimit);
+        return;
+      }
+    }
+
     var catagorySelectMenu = this.catagorySelectMenu.current
     var options = catagorySelectMenu.options;
     for (var i = 0; i < catagorySelectMenu.length; ++i) {
@@ -235,8 +246,8 @@ class TrailCatagoryWidget extends React.Component {
         return;
       }
     }
-    this.props.appEngine.addTrailCatagory(this.catagoryToAdd);
-    this.props.appEngine.switchToCatagory(this.catagoryToAdd);
+    appEngine.addTrailCatagory(this.catagoryToAdd);
+    appEngine.switchToCatagory(this.catagoryToAdd);
 
     this.catagoryWasAdded = true;
   }
@@ -424,6 +435,7 @@ class PracticeScreen extends React.Component {
     }
 
     if (appEngine.isUsingCustomStorage()) {
+      await appEngine.getCustomStorage().loadDataSizeLimits();
       this.setState({ isUsingCustomStorage: true });
     } else {
       this.setState({ isUsingCustomStorage: false });

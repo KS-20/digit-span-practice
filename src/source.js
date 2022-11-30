@@ -1,5 +1,5 @@
 // for reference: https://timodenk.com/blog/digit-span-test-online-tool/
-import { names, serverMsgs } from './repeatedStrings.js'
+import { names, serverMsgs , dbColumnNames } from './repeatedStrings.js'
 import { Dropbox, DropboxAuth, DropboxResponseError } from "dropbox"
 
 class SetRecord {
@@ -103,6 +103,10 @@ class AppEngine {
         this.currentCatagory = names.noCatagory;
     }
 
+    getLongTermStorage() {
+        return this.longTermStorage;
+    }
+
     getDropboxStorage() {
         return this.dropboxStorage;
     }
@@ -186,6 +190,9 @@ class AppEngine {
     async loadLongTermStorage() {
         try {
             this.guiController.setErrorMessage("");
+            if (this.longTermStorage instanceof CustomStorage){
+                await this.longTermStorage.loadDataSizeLimits();
+            }
             await this.loadPerfRecord();
             await this.loadCatagoryData();
         } catch (e) {
@@ -637,8 +644,8 @@ class CustomStorage {
         window.localStorage.setItem(CustomStorage.getUserNameKey(), userName);
     }
 
-    async makeRequest(method, requestHeader, requestBody) {
-        if (this.getAccessToken() == null) {
+    async makeRequest(method, requestHeader, requestBody, needsAccessToken = true) {
+        if (needsAccessToken && this.getAccessToken() == null) {
             return null;
         }
         var options = { method: method };
@@ -668,6 +675,18 @@ class CustomStorage {
             });
 
         return responseJson;
+    }
+
+    async loadDataSizeLimits () {
+        var requestHeader = {
+            requestType: "getDataSizeLimits",
+        }
+        const responseJson = await this.makeRequest("GET", requestHeader,null,false);
+        this.dataSizeLimits = responseJson.dataSizeLimits;
+    }
+
+    async getCatagorySizeLimit(){
+        return this.dataSizeLimits[dbColumnNames.currentCatagory];
     }
 
     async loadPerfRecord() {

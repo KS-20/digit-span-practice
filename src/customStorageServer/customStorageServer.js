@@ -124,6 +124,8 @@ http.createServer(async (req, res) => {
         sendCurrentCatagory(decodedToken, headers, res);
       } else if (requestType === "getTrailCatagories") {
         sendTrailCatagories(decodedToken, headers, res);
+      } else if (requestType === "getDataSizeLimits") {
+        sendDataSizeLimits(headers, res);
       }
     }
 
@@ -243,6 +245,12 @@ function sendPerfRecord(decodedToken, headers, res) {
   })
 }
 
+function sendDataSizeLimits(headers, res) {
+  const answerObj = { resultStr: "sent data size limits", dataSizeLimits: Object.fromEntries(databaseSizeLimits) };
+  res.writeHead(200, headers);
+  res.end(JSON.stringify(answerObj));
+}
+
 
 function savePerfRecord(decodedToken, requestObject, headers, res) {
 
@@ -266,9 +274,7 @@ function savePerfRecord(decodedToken, requestObject, headers, res) {
       const answerObj = { resultStr: "saved performancce record" };
       res.writeHead(200, headers);
       res.end(JSON.stringify(answerObj));
-
       connection.release()
-
     })
   })
 }
