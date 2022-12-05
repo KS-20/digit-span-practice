@@ -1,5 +1,5 @@
 // for reference: https://timodenk.com/blog/digit-span-test-online-tool/
-import { names, serverMsgs , dbColumnNames } from './repeatedStrings.js'
+import { names, serverMsgs, dbColumnNames } from './repeatedStrings.js'
 import { Dropbox, DropboxAuth, DropboxResponseError } from "dropbox"
 
 class SetRecord {
@@ -190,7 +190,7 @@ class AppEngine {
     async loadLongTermStorage() {
         try {
             this.guiController.setErrorMessage("");
-            if (this.longTermStorage instanceof CustomStorage){
+            if (this.longTermStorage instanceof CustomStorage) {
                 await this.longTermStorage.loadDataSizeLimits();
             }
             await this.loadPerfRecord();
@@ -257,19 +257,19 @@ class AppEngine {
 
     switchToDropboxStorage() {
         localStorage.setItem("storageType", names.dropbox);
-        this.guiController.setStorageTypeButton(names.dropbox);
+        this.guiController.setStorageTypeMenu(names.dropbox);
         this.longTermStorage = this.dropboxStorage;
     }
 
     switchToBrowserStorage() {
         localStorage.setItem("storageType", names.browserStorage);
-        this.guiController.setStorageTypeButton(names.browserStorage);
+        this.guiController.setStorageTypeMenu(names.browserStorage);
         this.longTermStorage = new BrowserStorage();
     }
 
     switchToCustomStorage() {
         localStorage.setItem("storageType", names.digitSpanPracticeServer);
-        this.guiController.setStorageTypeButton(names.digitSpanPracticeServer);
+        this.guiController.setStorageTypeMenu(names.digitSpanPracticeServer);
         this.longTermStorage = this.customStorage;
     }
 
@@ -294,14 +294,17 @@ class AppEngine {
         this.guiController.addTrailCatagory(name);
         this.longTermStorage.saveTrailCatagories(this.trailCatagoryArray);
     }
-    removeTrailCatagory(name) {
+    removeTrailCatagory(name, saveToStorage = true) {
         var callback = (currentValue) => { return currentValue !== name };
         this.trailCatagoryArray = this.trailCatagoryArray.filter(callback);
         this.guiController.removeTrailCatagory(name);
         if (this.currentCatagory === name) {
             this.switchToCatagory(names.noCatagory);
         }
-        this.longTermStorage.saveTrailCatagories(this.trailCatagoryArray);
+        if (saveToStorage) {
+            this.longTermStorage.saveTrailCatagories(this.trailCatagoryArray);
+        }
+
     }
 
     getCurrentCatagory() {
@@ -662,7 +665,7 @@ class CustomStorage {
             .then(async (response) => {
                 const json = await response.json();
                 if (!response.ok && response.status !== 404) {
-                    this.guiController.popUpMessage("server error, result message: "+ json.resultStr);
+                    this.guiController.popUpMessage("server error, result message: " + json.resultStr);
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 if (json.resultStr === serverMsgs.accessTokenExpired) {
@@ -677,15 +680,15 @@ class CustomStorage {
         return responseJson;
     }
 
-    async loadDataSizeLimits () {
+    async loadDataSizeLimits() {
         var requestHeader = {
             requestType: "getDataSizeLimits",
         }
-        const responseJson = await this.makeRequest("GET", requestHeader,null,false);
+        const responseJson = await this.makeRequest("GET", requestHeader, null, false);
         this.dataSizeLimits = responseJson.dataSizeLimits;
     }
 
-    async getCatagorySizeLimit(){
+    async getCatagorySizeLimit() {
         return this.dataSizeLimits[dbColumnNames.currentCatagory];
     }
 
@@ -903,8 +906,8 @@ class ReactGui {
         this.appComponent.setState({ savingStatusLine: msg });
     }
 
-    setStorageTypeButton(storageTypeStr) {
-        this.appComponent.setStorageTypeButton(storageTypeStr);
+    setStorageTypeMenu(storageTypeStr) {
+        this.appComponent.setStorageTypeMenu(storageTypeStr);
     }
 
     updateGUI() {

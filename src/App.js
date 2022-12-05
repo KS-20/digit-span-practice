@@ -224,7 +224,7 @@ class TrailCatagoryWidget extends React.Component {
 
   addCatagory = async (event) => {
     event.preventDefault();
-    if (this.catagoryToAdd == "") {
+    if (this.catagoryToAdd === "") {
       alert("Please enter the name of the catagory to add");
       return;
     }
@@ -361,7 +361,7 @@ class PracticeScreen extends React.Component {
     this.requestAccessCode = false;
     this.startButton = React.createRef();
     this.saveSettingButton = React.createRef();
-    this.storageTypeButton = React.createRef();
+    this.storageTypeMenu = React.createRef();
 
     this.setUpDropbox = this.setUpDropbox.bind(this);
     this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
@@ -394,8 +394,9 @@ class PracticeScreen extends React.Component {
     this.startButton.current.focus();
   }
 
-  setStorageTypeButton = (storageTypeStr) => {
-    this.storageTypeButton.current.value = storageTypeStr;
+  setStorageTypeMenu = (storageTypeStr) => {
+    this.storageTypeMenu.current.value = storageTypeStr;
+    this.storageTypeLastValue = storageTypeStr;
   }
 
   async componentDidMount() {
@@ -428,20 +429,53 @@ class PracticeScreen extends React.Component {
       appEngine.switchToBrowserStorage();
     } else if (names.dropbox === sourceToSwitchTo) {
       appEngine.switchToDropboxStorage();
-    } else if (names.digitSpanPracticeServer) {
-      appEngine.switchToCustomStorage();
+    } else if (names.digitSpanPracticeServer === sourceToSwitchTo) {
+      if ( ! await this.handleSwitchToCustomStorage() ) {
+        return
+      };
     } else {
       console.error("Invalid string");
     }
 
-    if (appEngine.isUsingCustomStorage()) {
-      await appEngine.getCustomStorage().loadDataSizeLimits();
-      this.setState({ isUsingCustomStorage: true });
-    } else {
+    if ( !appEngine.isUsingCustomStorage() ) {
       this.setState({ isUsingCustomStorage: false });
     }
     await appEngine.saveEverything();
 
+  }
+
+  handleSwitchToCustomStorage = async () => {
+    var appEngine = this.props.appEngine;
+    var customStorage = appEngine.getCustomStorage();
+    await customStorage.loadDataSizeLimits();
+    var catagorySizeLimit = await customStorage.getCatagorySizeLimit();
+    var categoriesArray = appEngine.getTrailCatagories();
+    var askToPrune = false;
+    for (const categoryName of categoriesArray) {
+      if (categoryName.length > catagorySizeLimit) {
+        askToPrune = true;
+        break;
+      }
+    }
+
+    if (askToPrune) {
+      var shouldPrune = window.confirm("One or more of your categories exceeds the maximum number of characters allowed " +
+        "by the custom storage server (" + catagorySizeLimit + " characters) click OK to have the categories" +
+        "removed, click cancel to not switch to the custom storage server");
+      if (shouldPrune) {
+        for (const categoryName of categoriesArray) {
+          if (categoryName.length > catagorySizeLimit) {
+            appEngine.removeTrailCatagory(categoryName,false);
+          }
+        }
+      } else { 
+        this.setStorageTypeMenu(this.storageTypeLastValue);
+        return false;
+      };
+    }
+    this.setState({ isUsingCustomStorage: true });
+    appEngine.switchToCustomStorage();
+    return true;
   }
 
   AdjustDisableStatus = () => {
@@ -507,7 +541,7 @@ class PracticeScreen extends React.Component {
           <button id="saveSettings" type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
           <form>
             <label htmlFor="dataSource">Save and Load to  </label>
-            <select onInput={this.setStorageTech} name="dataSource" id="dataSource" ref={this.storageTypeButton}>
+            <select onInput={this.setStorageTech} name="dataSource" id="dataSource" ref={this.storageTypeMenu}>
               <option value={names.dropbox}>{names.dropbox}</option>
               <option value={names.browserStorage}>{names.browserStorage}</option>
               <option value={names.digitSpanPracticeServer}>{names.digitSpanPracticeServer}</option>
