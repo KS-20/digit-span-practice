@@ -122,7 +122,7 @@ http.createServer(async (req, res) => {
         sendPerfRecord(decodedToken, headers, res);
       } else if (requestType === "getCurrentCatagory") {
         sendCurrentCatagory(decodedToken, headers, res);
-      } else if (requestType === "getTrailCatagories") {
+      } else if (requestType === "getTrailCategories") {
         sendTrailCatagories(decodedToken, headers, res);
       } else if (requestType === "getDataSizeLimits") {
         sendDataSizeLimits(headers, res);
@@ -168,7 +168,7 @@ function saveCurrentCatagory(decodedToken, requestObject, headers, res) {
   const catagorySizeLimit = databaseSizeLimits.get(dbColumnNames.currentCatagory);
   const currentCatagory = requestObject.currentCatagory;
   if( currentCatagory.length > catagorySizeLimit ) {
-    const answerObj = { resultStr: "Current catagory exceeds the maximum size of "+catagorySizeLimit+" characters" };
+    const answerObj = { resultStr: "Current category exceeds the maximum size of "+catagorySizeLimit+" characters" };
     res.writeHead(409, headers);
     res.end(JSON.stringify(answerObj));
     return;
@@ -198,7 +198,7 @@ function sendCurrentCatagory(decodedToken, headers, res) {
     const search_query = mysql.format(sqlSearch, [decodedToken.userName])
     connection.query(search_query, async (err, result) => {
       if (err) throw (err)
-      const answerObj = { resultStr: "sent current catagory", currentCatagory: result[0].CurrentCatagory };
+      const answerObj = { resultStr: "sent current category", currentCatagory: result[0].CurrentCatagory };
       res.writeHead(200, headers);
       res.end(JSON.stringify(answerObj));
 

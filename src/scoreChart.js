@@ -109,7 +109,7 @@ class ScoreChart extends React.Component {
 
     var catagoryDisplayLine ;
     if( currentCatagory !== names.noCatagory ) {
-      catagoryDisplayLine = <p id="catagoryDisplayLine">Showing results only for catagory "{currentCatagory}"</p>;
+      catagoryDisplayLine = <p id="catagoryDisplayLine">Showing results only for category "{currentCatagory}"</p>;
     } else {
       catagoryDisplayLine = <p>Showing results for all catagories</p>;
     }

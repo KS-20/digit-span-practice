@@ -222,21 +222,30 @@ class TrailCatagoryWidget extends React.Component {
     this.props.appEngine.getGuiController().setCatagoryComponent(this);
   }
 
-  addCatagory = async (event) => {
+  addCategory = async (event) => {
     event.preventDefault();
     if (this.catagoryToAdd === "") {
-      alert("Please enter the name of the catagory to add");
+      alert("Please enter the name of the category to add");
       return;
     }
     var appEngine = this.props.appEngine;
     var longTermStorage = appEngine.getLongTermStorage();
     if (appEngine.isUsingCustomStorage()) {
-      var catagorySizeLimit = await longTermStorage.getCatagorySizeLimit();
+      var catagorySizeLimit = longTermStorage.getCategorySizeLimit();
       if (this.catagoryToAdd.length > catagorySizeLimit) {
-        alert("Size of current catagory must not exceed the maximum size set by the custom storage server of "
+        alert("Size of current category must not exceed the maximum size set by the custom storage server of "
           + catagorySizeLimit);
         return;
       }
+    }
+    var categoriesArray = [...appEngine.getTrailCategories()];
+    categoriesArray.push(this.catagoryToAdd);
+    var result = longTermStorage.checkCategoriesSize(categoriesArray);
+    if (result.isDataTooBig) {
+      alert("the size of storing all the categories in the custom storage server is too big,"+
+      "the size to store is "+result.arrayDataSize+" characters, but the maximum size is "+
+      result.sizeLimit);
+      return;
     }
 
     var catagorySelectMenu = this.catagorySelectMenu.current
@@ -295,7 +304,7 @@ class TrailCatagoryWidget extends React.Component {
           {options}
         </select>
       </form>
-      <form onSubmit={this.addCatagory}>
+      <form onSubmit={this.addCategory}>
         <label htmlFor="fname">Add trail catagory: </label>
         <input type="text" id="fname" name="fname" onChange={(event) => { this.catagoryToAdd = event.target.value }} />
         <input type="submit" value="Add" />
@@ -448,8 +457,8 @@ class PracticeScreen extends React.Component {
     var appEngine = this.props.appEngine;
     var customStorage = appEngine.getCustomStorage();
     await customStorage.loadDataSizeLimits();
-    var catagorySizeLimit = await customStorage.getCatagorySizeLimit();
-    var categoriesArray = appEngine.getTrailCatagories();
+    var catagorySizeLimit = customStorage.getCategorySizeLimit();
+    var categoriesArray = appEngine.getTrailCategories();
     var askToPrune = false;
     for (const categoryName of categoriesArray) {
       if (categoryName.length > catagorySizeLimit) {

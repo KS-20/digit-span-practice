@@ -317,7 +317,7 @@ class AppEngine {
         this.guiController.updateGUI();
     }
 
-    getTrailCatagories() {
+    getTrailCategories() {
         return this.trailCatagoryArray;
     }
 }
@@ -442,9 +442,9 @@ class DropboxStorage {
     }
 
     async loadCurrentCatagory() {
-        var startingStatusLine = "Trying to load current catagory from Dropbox";
-        var endingStatusLine = "Current catagory loaded successfully from Dropbox";
-        var infoNotFoundMsg = "Current catagory information not found in Dropbox";
+        var startingStatusLine = "Trying to load current category from Dropbox";
+        var endingStatusLine = "Current category loaded successfully from Dropbox";
+        var infoNotFoundMsg = "Current category information not found in Dropbox";
         var fileName = "digit_span_current_catagory.json";
         const jsonString = await this.downloadFromDropbox(startingStatusLine, endingStatusLine, infoNotFoundMsg, fileName);
         if (jsonString == null) {
@@ -579,6 +579,14 @@ class CustomStorage {
         this.guiController = guiController;
     }
 
+    checkCategoriesSize (categoryArray) {
+        var result = {};
+        result.arrayDataSize = JSON.stringify(categoryArray).length;
+        result.sizeLimit = this.dataSizeLimits[dbColumnNames.trailCatagories] ;
+        result.isDataTooBig = result.arrayDataSize > result.sizeLimit;
+        return result;
+    }
+
     logIn(userName, password, reportLogin = true) {
         var requestBody = {
             requestType: "login",
@@ -688,7 +696,7 @@ class CustomStorage {
         this.dataSizeLimits = responseJson.dataSizeLimits;
     }
 
-    async getCatagorySizeLimit() {
+    getCategorySizeLimit() {
         return this.dataSizeLimits[dbColumnNames.currentCatagory];
     }
 
@@ -755,7 +763,7 @@ class CustomStorage {
 
     async loadCatagoryArray() {
         var requestHeader = {
-            requestType: "getTrailCatagories",
+            requestType: "getTrailCategories",
             accessToken: this.getAccessToken(),
         }
 

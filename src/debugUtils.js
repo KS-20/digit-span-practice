@@ -9,7 +9,7 @@ function fillPerfRecord(numOfRecords = 3600) {
     }
 }
 
-function fillCatafories(NumOfCatagories = 17){
+function fillCatefories(NumOfCatagories = 17){
     var dummyArray=[];
     for (var i=0;i<NumOfCatagories;++i) {
         var catagoryName = 'c'+i.toString().padStart(29,'0');
@@ -24,4 +24,4 @@ function fillCatafories(NumOfCatagories = 17){
 
 window.appEngine = appEngine;
 window.fillPerfRecord = fillPerfRecord;
-window.fillCatafories = fillCatafories;
+window.fillCatefories = fillCatefories;
