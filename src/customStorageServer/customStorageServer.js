@@ -112,18 +112,18 @@ http.createServer(async (req, res) => {
         await logInUser(requestObject, headers, res);
       } else if (requestType == "setPerformanceRecord") {
         savePerfRecord(decodedToken, requestObject, headers, res);
-      } else if (requestType == "saveCurrentCatagory") {
-        saveCurrentCatagory(decodedToken, requestObject, headers, res);
-      } else if (requestType == "saveTrailCatagories") {
-        saveTrailCatagories(decodedToken, requestObject, headers, res);
+      } else if (requestType == "saveCurrentCategory") {
+        saveCurrentCategory(decodedToken, requestObject, headers, res);
+      } else if (requestType == "saveTrailCategories") {
+        saveTrailCategories(decodedToken, requestObject, headers, res);
       }
     } else if (req.headers.requesttype !== undefined) {
       if (requestType === "getPerformanceRecord") {
         sendPerfRecord(decodedToken, headers, res);
-      } else if (requestType === "getCurrentCatagory") {
-        sendCurrentCatagory(decodedToken, headers, res);
+      } else if (requestType === "getCurrentCategory") {
+        sendCurrentCategory(decodedToken, headers, res);
       } else if (requestType === "getTrailCategories") {
-        sendTrailCatagories(decodedToken, headers, res);
+        sendTrailCategories(decodedToken, headers, res);
       } else if (requestType === "getDataSizeLimits") {
         sendDataSizeLimits(headers, res);
       }
@@ -136,12 +136,12 @@ http.createServer(async (req, res) => {
   res.end(`${req.method} is not allowed for the request.`);
 }).listen(port);
 
-function saveTrailCatagories(decodedToken, requestObject, headers, res) {
-  const catagoriesSizeLimit = databaseSizeLimits.get(dbColumnNames.trailCatagories);
+function saveTrailCategories(decodedToken, requestObject, headers, res) {
+  const categoriesSizeLimit = databaseSizeLimits.get(dbColumnNames.trailCategories);
 
-  const catagoriesArray = requestObject.catagoriesArray;
-  if( catagoriesArray.length > catagoriesSizeLimit ) {
-    const answerObj = { resultStr: "Catagories data exceeds the maximum size of "+catagoriesSizeLimit+" characters" };
+  const categoriesArray = requestObject.categoriesArray;
+  if( categoriesArray.length > categoriesSizeLimit ) {
+    const answerObj = { resultStr: "Categories data exceeds the maximum size of "+categoriesSizeLimit+" characters" };
     res.writeHead(409, headers);
     res.end(JSON.stringify(answerObj));
     return;
@@ -150,11 +150,11 @@ function saveTrailCatagories(decodedToken, requestObject, headers, res) {
 
   db.getConnection(async (err, connection) => {
     if (err) throw (err)
-    const sqlSearch = "UPDATE users SET TrailCatagories = ? WHERE UserName = ?"
-    const search_query = mysql.format(sqlSearch, [catagoriesArray, decodedToken.userName])
+    const sqlSearch = "UPDATE users SET TrailCategories = ? WHERE UserName = ?"
+    const search_query = mysql.format(sqlSearch, [categoriesArray, decodedToken.userName])
     connection.query(search_query, async (err, result) => {
       if (err) throw (err)
-      const answerObj = { resultStr: "saved trail catagories" };
+      const answerObj = { resultStr: "saved trail categories" };
       res.writeHead(200, headers);
       res.end(JSON.stringify(answerObj));
 
@@ -164,11 +164,11 @@ function saveTrailCatagories(decodedToken, requestObject, headers, res) {
 }
 
 
-function saveCurrentCatagory(decodedToken, requestObject, headers, res) {
-  const catagorySizeLimit = databaseSizeLimits.get(dbColumnNames.currentCatagory);
-  const currentCatagory = requestObject.currentCatagory;
-  if( currentCatagory.length > catagorySizeLimit ) {
-    const answerObj = { resultStr: "Current category exceeds the maximum size of "+catagorySizeLimit+" characters" };
+function saveCurrentCategory(decodedToken, requestObject, headers, res) {
+  const categorySizeLimit = databaseSizeLimits.get(dbColumnNames.currentCategory);
+  const currentCategory = requestObject.currentCategory;
+  if( currentCategory.length > categorySizeLimit ) {
+    const answerObj = { resultStr: "Current category exceeds the maximum size of "+categorySizeLimit+" characters" };
     res.writeHead(409, headers);
     res.end(JSON.stringify(answerObj));
     return;
@@ -176,11 +176,11 @@ function saveCurrentCatagory(decodedToken, requestObject, headers, res) {
 
   db.getConnection(async (err, connection) => {
     if (err) throw (err)
-    const sqlSearch = "UPDATE users SET CurrentCatagory = ? WHERE UserName = ?"
-    const search_query = mysql.format(sqlSearch, [currentCatagory, decodedToken.userName])
+    const sqlSearch = "UPDATE users SET CurrentCategory = ? WHERE UserName = ?"
+    const search_query = mysql.format(sqlSearch, [currentCategory, decodedToken.userName])
     connection.query(search_query, async (err, result) => {
       if (err) throw (err)
-      const answerObj = { resultStr: "saved current catagory" };
+      const answerObj = { resultStr: "saved current category" };
       res.writeHead(200, headers);
       res.end(JSON.stringify(answerObj));
 
@@ -190,15 +190,15 @@ function saveCurrentCatagory(decodedToken, requestObject, headers, res) {
   })
 }
 
-function sendCurrentCatagory(decodedToken, headers, res) {
+function sendCurrentCategory(decodedToken, headers, res) {
 
   db.getConnection(async (err, connection) => {
     if (err) throw (err)
-    const sqlSearch = "SELECT CurrentCatagory FROM users WHERE UserName = ?"
+    const sqlSearch = "SELECT CurrentCategory FROM users WHERE UserName = ?"
     const search_query = mysql.format(sqlSearch, [decodedToken.userName])
     connection.query(search_query, async (err, result) => {
       if (err) throw (err)
-      const answerObj = { resultStr: "sent current category", currentCatagory: result[0].CurrentCatagory };
+      const answerObj = { resultStr: "sent current category", currentCategory: result[0].CurrentCategory };
       res.writeHead(200, headers);
       res.end(JSON.stringify(answerObj));
 
@@ -208,15 +208,15 @@ function sendCurrentCatagory(decodedToken, headers, res) {
   })
 }
 
-function sendTrailCatagories(decodedToken, headers, res) {
+function sendTrailCategories(decodedToken, headers, res) {
 
   db.getConnection(async (err, connection) => {
     if (err) throw (err)
-    const sqlSearch = "SELECT TrailCatagories FROM users WHERE UserName = ?"
+    const sqlSearch = "SELECT TrailCategories FROM users WHERE UserName = ?"
     const search_query = mysql.format(sqlSearch, [decodedToken.userName])
     connection.query(search_query, async (err, result) => {
       if (err) throw (err)
-      const answerObj = { resultStr: "sent trail catagories", catagoriesArray: result[0].TrailCatagories };
+      const answerObj = { resultStr: "sent trail categories", categoriesArray: result[0].TrailCategories };
       res.writeHead(200, headers);
       res.end(JSON.stringify(answerObj));
 

@@ -5,7 +5,7 @@ import { Dropbox, DropboxAuth, DropboxResponseError } from "dropbox"
 class SetRecord {
     constructor() {
         this.setRecordArray = [];
-        this.catagory = "";
+        this.category = "";
         this.maxScore = 0;
     }
 
@@ -51,12 +51,12 @@ class SetRecord {
         return Math.round(this.getNumOfSuccessfulExercises() / this.getNumOfExercises() * 100);
     }
 
-    getCatagory() {
-        return this.catagory;
+    getCategory() {
+        return this.category;
     }
 
-    setCatagory(catagoryName) {
-        this.catagory = catagoryName;
+    setCategory(categoryName) {
+        this.category = categoryName;
     }
 }
 
@@ -85,7 +85,7 @@ class PerformanceRecord {
             for (let score of unTypedSetRecord.setRecordArray) {
                 setRecord.addScore(score);
             }
-            setRecord.setCatagory(unTypedSetRecord.catagory);
+            setRecord.setCategory(unTypedSetRecord.category);
             this.addSetRecord(setRecord)
         }
     }
@@ -99,8 +99,8 @@ class AppEngine {
         this.dropboxStorage = new DropboxStorage(guiController);
         this.customStorage = new CustomStorage(guiController);
         this.longTermStorage = this.dropboxStorage;
-        this.trailCatagoryArray = [];
-        this.currentCatagory = names.noCatagory;
+        this.trailCategoryArray = [];
+        this.currentCategory = names.noCategory;
     }
 
     getLongTermStorage() {
@@ -144,8 +144,8 @@ class AppEngine {
         if (this.currentRepIndex < this.guiController.getNumOfReps()) {
             this.prepareForQuestion();
         } else {
-            if (this.currentCatagory !== names.noCatagory) {
-                this.currentSetRecord.setCatagory(this.currentCatagory);
+            if (this.currentCategory !== names.noCategory) {
+                this.currentSetRecord.setCategory(this.currentCategory);
             }
             this.performanceRecord.addSetRecord(this.currentSetRecord);
             var msg = "succeeded in  " + this.currentSetRecord.getNumOfSuccessfulExercises() + " out of " +
@@ -194,20 +194,20 @@ class AppEngine {
                 await this.longTermStorage.loadDataSizeLimits();
             }
             await this.loadPerfRecord();
-            await this.loadCatagoryData();
+            await this.loadCategoryData();
         } catch (e) {
             this.guiController.setSavingStatusLine("");
             this.processException(e);
         }
     }
 
-    async loadCatagoryData() {
-        this.trailCatagoryArray = await this.longTermStorage.loadCatagoryArray();
-        for (const trailCatagory of this.trailCatagoryArray) {
-            this.guiController.addTrailCatagory(trailCatagory);
+    async loadCategoryData() {
+        this.trailCategoryArray = await this.longTermStorage.loadCategoryArray();
+        for (const trailCategory of this.trailCategoryArray) {
+            this.guiController.addTrailCategory(trailCategory);
         }
-        this.currentCatagory = await this.longTermStorage.loadCurrentCatagory();
-        this.guiController.setSelectedCatagory(this.currentCatagory);
+        this.currentCategory = await this.longTermStorage.loadCurrentCategory();
+        this.guiController.setSelectedCategory(this.currentCategory);
     }
 
     async loadPerfRecord() {
@@ -280,8 +280,8 @@ class AppEngine {
     async saveEverything() {
         try {
             await this.longTermStorage.savePerfRecord(this.getPerformanceRecord());
-            this.longTermStorage.saveTrailCatagories(this.trailCatagoryArray);
-            this.longTermStorage.saveCurrentCatagory(this.currentCatagory);
+            this.longTermStorage.saveTrailCategories(this.trailCategoryArray);
+            this.longTermStorage.saveCurrentCategory(this.currentCategory);
         } catch (e) {
             this.guiController.setSavingStatusLine("");
             this.processException(e);
@@ -289,36 +289,36 @@ class AppEngine {
 
     }
 
-    addTrailCatagory(name) {
-        this.trailCatagoryArray.push(name);
-        this.guiController.addTrailCatagory(name);
-        this.longTermStorage.saveTrailCatagories(this.trailCatagoryArray);
+    addTrailCategory(name) {
+        this.trailCategoryArray.push(name);
+        this.guiController.addTrailCategory(name);
+        this.longTermStorage.saveTrailCategories(this.trailCategoryArray);
     }
-    removeTrailCatagory(name, saveToStorage = true) {
+    removeTrailCategory(name, saveToStorage = true) {
         var callback = (currentValue) => { return currentValue !== name };
-        this.trailCatagoryArray = this.trailCatagoryArray.filter(callback);
-        this.guiController.removeTrailCatagory(name);
-        if (this.currentCatagory === name) {
-            this.switchToCatagory(names.noCatagory);
+        this.trailCategoryArray = this.trailCategoryArray.filter(callback);
+        this.guiController.removeTrailCategory(name);
+        if (this.currentCategory === name) {
+            this.switchToCategory(names.noCategory);
         }
         if (saveToStorage) {
-            this.longTermStorage.saveTrailCatagories(this.trailCatagoryArray);
+            this.longTermStorage.saveTrailCategories(this.trailCategoryArray);
         }
 
     }
 
-    getCurrentCatagory() {
-        return this.currentCatagory;
+    getCurrentCategory() {
+        return this.currentCategory;
     }
 
-    switchToCatagory(name) {
-        this.currentCatagory = name;
-        this.longTermStorage.saveCurrentCatagory(name);
+    switchToCategory(name) {
+        this.currentCategory = name;
+        this.longTermStorage.saveCurrentCategory(name);
         this.guiController.updateGUI();
     }
 
     getTrailCategories() {
-        return this.trailCatagoryArray;
+        return this.trailCategoryArray;
     }
 }
 
@@ -363,29 +363,29 @@ class BrowserStorage {
         return "performanceRecordLocalStorage";
     }
 
-    static getCatagoriesItemName() {
-        return "trailCatagoriesLocalStorage";
+    static getCategoriesItemName() {
+        return "trailCategoriesLocalStorage";
     }
 
-    static getCurrentCatagoryItemName() {
-        return "currentCatagoryLocalStorage";
+    static getCurrentCategoryItemName() {
+        return "currentCategoryLocalStorage";
     }
 
-    saveTrailCatagories(catagoriesArray) {
-        var jsonString = JSON.stringify(catagoriesArray);
-        window.localStorage.setItem(BrowserStorage.getCatagoriesItemName(), jsonString);
+    saveTrailCategories(categoriesArray) {
+        var jsonString = JSON.stringify(categoriesArray);
+        window.localStorage.setItem(BrowserStorage.getCategoriesItemName(), jsonString);
     }
 
-    saveCurrentCatagory(currentCatagory) {
-        window.localStorage.setItem(BrowserStorage.getCurrentCatagoryItemName(), currentCatagory);
+    saveCurrentCategory(currentCategory) {
+        window.localStorage.setItem(BrowserStorage.getCurrentCategoryItemName(), currentCategory);
     }
 
-    loadCurrentCatagory() {
-        return window.localStorage.getItem(BrowserStorage.getCurrentCatagoryItemName());
+    loadCurrentCategory() {
+        return window.localStorage.getItem(BrowserStorage.getCurrentCategoryItemName());
     }
 
-    loadCatagoryArray() {
-        const jsonString = window.localStorage.getItem(BrowserStorage.getCatagoriesItemName());
+    loadCategoryArray() {
+        const jsonString = window.localStorage.getItem(BrowserStorage.getCategoriesItemName());
         var parsedJSON = JSON.parse(jsonString);
         if (parsedJSON == null) {
             return []
@@ -405,13 +405,13 @@ class DropboxStorage {
         this.guiController = guiController;
     }
 
-    async saveTrailCatagories(catagoriesArray) {
+    async saveTrailCategories(categoriesArray) {
         this.guiController.setSavingStatusLine("Trying to upload data to Dropbox");
         this.setUpDbx();
-        var fileContent = JSON.stringify(catagoriesArray);
+        var fileContent = JSON.stringify(categoriesArray);
         var args = {
             contents: fileContent,
-            path: "/digit_span_catagories_array.json",
+            path: "/digit_span_categories_array.json",
             mode: { ".tag": "overwrite" },
             autorename: true,
             mute: true,
@@ -423,13 +423,13 @@ class DropboxStorage {
         this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
     }
 
-    async saveCurrentCatagory(currentCatagory) {
+    async saveCurrentCategory(currentCategory) {
         this.guiController.setSavingStatusLine("Trying to upload data to Dropbox");
         this.setUpDbx();
-        var fileContent = JSON.stringify(currentCatagory);
+        var fileContent = JSON.stringify(currentCategory);
         var args = {
             contents: fileContent,
-            path: "/digit_span_current_catagory.json",
+            path: "/digit_span_current_category.json",
             mode: { ".tag": "overwrite" },
             autorename: true,
             mute: true,
@@ -441,17 +441,17 @@ class DropboxStorage {
         this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
     }
 
-    async loadCurrentCatagory() {
+    async loadCurrentCategory() {
         var startingStatusLine = "Trying to load current category from Dropbox";
         var endingStatusLine = "Current category loaded successfully from Dropbox";
         var infoNotFoundMsg = "Current category information not found in Dropbox";
-        var fileName = "digit_span_current_catagory.json";
+        var fileName = "digit_span_current_category.json";
         const jsonString = await this.downloadFromDropbox(startingStatusLine, endingStatusLine, infoNotFoundMsg, fileName);
         if (jsonString == null) {
-            return names.noCatagory;
+            return names.noCategory;
         } else {
-            var currentCatagory = JSON.parse(jsonString);
-            return currentCatagory;
+            var currentCategory = JSON.parse(jsonString);
+            return currentCategory;
         }
     }
 
@@ -491,17 +491,17 @@ class DropboxStorage {
         return jsonString;
     }
 
-    async loadCatagoryArray() {
-        var startingStatusLine = "Trying to load list of catagories from Dropbox";
-        var endingStatusLine = "list of catagories loaded successfully from Dropbox";
+    async loadCategoryArray() {
+        var startingStatusLine = "Trying to load list of categories from Dropbox";
+        var endingStatusLine = "list of categories loaded successfully from Dropbox";
         var infoNotFoundMsg = "Performance data not found in Dropbox";
-        var fileName = "digit_span_catagories_array.json";
+        var fileName = "digit_span_categories_array.json";
         const jsonString = await this.downloadFromDropbox(startingStatusLine, endingStatusLine, infoNotFoundMsg, fileName);
         if (jsonString == null) {
             return [];
         } else {
-            var catagoryArray = JSON.parse(jsonString);
-            return catagoryArray;
+            var categoryArray = JSON.parse(jsonString);
+            return categoryArray;
         }
     }
 
@@ -582,7 +582,7 @@ class CustomStorage {
     checkCategoriesSize (categoryArray) {
         var result = {};
         result.arrayDataSize = JSON.stringify(categoryArray).length;
-        result.sizeLimit = this.dataSizeLimits[dbColumnNames.trailCatagories] ;
+        result.sizeLimit = this.dataSizeLimits[dbColumnNames.trailCategories] ;
         result.isDataTooBig = result.arrayDataSize > result.sizeLimit;
         return result;
     }
@@ -697,7 +697,7 @@ class CustomStorage {
     }
 
     getCategorySizeLimit() {
-        return this.dataSizeLimits[dbColumnNames.currentCatagory];
+        return this.dataSizeLimits[dbColumnNames.currentCategory];
     }
 
     async loadPerfRecord() {
@@ -726,42 +726,42 @@ class CustomStorage {
         this.makeRequest("POST", null, requestBody);
     }
 
-    saveTrailCatagories(catagoriesArray) {
-        var jsonString = JSON.stringify(catagoriesArray);
+    saveTrailCategories(categoriesArray) {
+        var jsonString = JSON.stringify(categoriesArray);
 
         var requestBody = {
-            requestType: "saveTrailCatagories",
+            requestType: "saveTrailCategories",
             accessToken: this.getAccessToken(),
-            catagoriesArray: jsonString,
+            categoriesArray: jsonString,
         }
         this.makeRequest("POST", null, requestBody);
     }
 
-    saveCurrentCatagory(currentCatagory) {
+    saveCurrentCategory(currentCategory) {
         var requestBody = {
-            requestType: "saveCurrentCatagory",
+            requestType: "saveCurrentCategory",
             accessToken: this.getAccessToken(),
-            currentCatagory: currentCatagory,
+            currentCategory: currentCategory,
         }
         this.makeRequest("POST", null, requestBody);
     }
 
-    async loadCurrentCatagory() {
+    async loadCurrentCategory() {
         var requestHeader = {
-            requestType: "getCurrentCatagory",
+            requestType: "getCurrentCategory",
             accessToken: this.getAccessToken(),
         }
 
         const responseJson = await this.makeRequest("GET", requestHeader);
-        if (responseJson == null || responseJson.currentCatagory == null) {
-            return names.noCatagory;
+        if (responseJson == null || responseJson.currentCategory == null) {
+            return names.noCategory;
         } else {
-            return responseJson.currentCatagory;
+            return responseJson.currentCategory;
         }
 
     }
 
-    async loadCatagoryArray() {
+    async loadCategoryArray() {
         var requestHeader = {
             requestType: "getTrailCategories",
             accessToken: this.getAccessToken(),
@@ -769,10 +769,10 @@ class CustomStorage {
 
         const responseJson = await this.makeRequest("GET", requestHeader);
 
-        if (responseJson == null || responseJson.catagoriesArray == null) {
+        if (responseJson == null || responseJson.categoriesArray == null) {
             return [];
         } else {
-            return JSON.parse(responseJson.catagoriesArray);
+            return JSON.parse(responseJson.categoriesArray);
         }
     }
 }
@@ -818,33 +818,33 @@ class ReactGui {
         this.appComponent = appComponent;
     }
 
-    setCatagoryComponent(catagoryComponent) {
-        this.catagoryComponent = catagoryComponent;
+    setCategoryComponent(categoryComponent) {
+        this.categoryComponent = categoryComponent;
     }
 
-    addTrailCatagory(name) {
-        this.catagoryComponent.setState((state, props) => {
-            var newArray = [...state.catagoryNamesArray]; //copy array because setState runs twice under <React.StrictMode>
-            if (!newArray.includes(name)) { // loadCatagoryData runs twice under <React.StrictMode>
+    addTrailCategory(name) {
+        this.categoryComponent.setState((state, props) => {
+            var newArray = [...state.categoryNamesArray]; //copy array because setState runs twice under <React.StrictMode>
+            if (!newArray.includes(name)) { // loadCategoryData runs twice under <React.StrictMode>
                 newArray.push(name);
             }
-            var result = { catagoryNamesArray: newArray };
+            var result = { categoryNamesArray: newArray };
             return result;
         });
     }
 
-    removeTrailCatagory(name) {
-        this.catagoryComponent.setState((state, props) => {
-            var newArray = [...state.catagoryNamesArray]; //copy array because setState runs twice under <React.StrictMode>
+    removeTrailCategory(name) {
+        this.categoryComponent.setState((state, props) => {
+            var newArray = [...state.categoryNamesArray]; //copy array because setState runs twice under <React.StrictMode>
             var callback = (currentValue) => { return currentValue !== name };
             newArray = newArray.filter(callback);
-            var result = { catagoryNamesArray: newArray };
+            var result = { categoryNamesArray: newArray };
             return result;
         });
     }
 
-    setSelectedCatagory(name) {
-        this.catagoryComponent.setSelectedCatagory(name);
+    setSelectedCategory(name) {
+        this.categoryComponent.setSelectedCategory(name);
     }
 
     setInput(input) {

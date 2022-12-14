@@ -208,38 +208,38 @@ class App extends React.Component {
   }
 }
 
-class TrailCatagoryWidget extends React.Component {
+class TrailCategoryWidget extends React.Component {
   constructor(props) {
     super(props);
-    this.catagorySelectMenu = React.createRef();
-    this.catagoryRemoveMenu = React.createRef();
-    this.state = { catagoryNamesArray: [] };
-    this.catagoryWasAdded = false;
-    this.catagoryToAdd = "";
+    this.categorySelectMenu = React.createRef();
+    this.categoryRemoveMenu = React.createRef();
+    this.state = { categoryNamesArray: [] };
+    this.categoryWasAdded = false;
+    this.categoryToAdd = "";
   }
 
   async componentDidMount() {
-    this.props.appEngine.getGuiController().setCatagoryComponent(this);
+    this.props.appEngine.getGuiController().setCategoryComponent(this);
   }
 
   addCategory = async (event) => {
     event.preventDefault();
-    if (this.catagoryToAdd === "") {
+    if (this.categoryToAdd === "") {
       alert("Please enter the name of the category to add");
       return;
     }
     var appEngine = this.props.appEngine;
     var longTermStorage = appEngine.getLongTermStorage();
     if (appEngine.isUsingCustomStorage()) {
-      var catagorySizeLimit = longTermStorage.getCategorySizeLimit();
-      if (this.catagoryToAdd.length > catagorySizeLimit) {
+      var categorySizeLimit = longTermStorage.getCategorySizeLimit();
+      if (this.categoryToAdd.length > categorySizeLimit) {
         alert("Size of current category must not exceed the maximum size set by the custom storage server of "
-          + catagorySizeLimit);
+          + categorySizeLimit);
         return;
       }
     }
     var categoriesArray = [...appEngine.getTrailCategories()];
-    categoriesArray.push(this.catagoryToAdd);
+    categoriesArray.push(this.categoryToAdd);
     var result = longTermStorage.checkCategoriesSize(categoriesArray);
     if (result.isDataTooBig) {
       alert("the size of storing all the categories in the custom storage server is too big,"+
@@ -248,74 +248,74 @@ class TrailCatagoryWidget extends React.Component {
       return;
     }
 
-    var catagorySelectMenu = this.catagorySelectMenu.current
-    var options = catagorySelectMenu.options;
-    for (var i = 0; i < catagorySelectMenu.length; ++i) {
-      if (options[i].text === this.catagoryToAdd) {
+    var categorySelectMenu = this.categorySelectMenu.current
+    var options = categorySelectMenu.options;
+    for (var i = 0; i < categorySelectMenu.length; ++i) {
+      if (options[i].text === this.categoryToAdd) {
         return;
       }
     }
-    appEngine.addTrailCatagory(this.catagoryToAdd);
-    appEngine.switchToCatagory(this.catagoryToAdd);
+    appEngine.addTrailCategory(this.categoryToAdd);
+    appEngine.switchToCategory(this.categoryToAdd);
 
-    this.catagoryWasAdded = true;
+    this.categoryWasAdded = true;
   }
 
-  removeCatagory = (event) => {
+  removeCategory = (event) => {
     event.preventDefault();
-    var name = this.catagoryRemoveMenu.current.value;
-    this.props.appEngine.removeTrailCatagory(name)
+    var name = this.categoryRemoveMenu.current.value;
+    this.props.appEngine.removeTrailCategory(name)
   }
 
-  setSelectedCatagory(name) {
-    var catagorySelectMenu = this.catagorySelectMenu.current
-    var options = catagorySelectMenu.options;
-    for (var i = 0; i < catagorySelectMenu.length; ++i) {
+  setSelectedCategory(name) {
+    var categorySelectMenu = this.categorySelectMenu.current
+    var options = categorySelectMenu.options;
+    for (var i = 0; i < categorySelectMenu.length; ++i) {
       if (options[i].text === name) {
-        catagorySelectMenu.selectedIndex = i;
+        categorySelectMenu.selectedIndex = i;
         return;
       }
     }
   }
 
-  switchToCatagory = (event) => {
-    var name = this.catagorySelectMenu.current.value;
-    this.props.appEngine.switchToCatagory(name);
+  switchToCategory = (event) => {
+    var name = this.categorySelectMenu.current.value;
+    this.props.appEngine.switchToCategory(name);
   }
 
   componentDidUpdate() {
-    if (this.catagoryWasAdded) {
-      var catagorySelectMenu = this.catagorySelectMenu.current;
-      catagorySelectMenu.selectedIndex = catagorySelectMenu.length - 1;
-      this.catagoryWasAdded = false;
+    if (this.categoryWasAdded) {
+      var categorySelectMenu = this.categorySelectMenu.current;
+      categorySelectMenu.selectedIndex = categorySelectMenu.length - 1;
+      this.categoryWasAdded = false;
     }
   }
 
   render() {
     var options = [];
-    for (var catagoryName of this.state.catagoryNamesArray) {
-      options.push(<option key={catagoryName} value={catagoryName}>{catagoryName}</option>);
+    for (var categoryName of this.state.categoryNamesArray) {
+      options.push(<option key={categoryName} value={categoryName}>{categoryName}</option>);
     }
     return (<>
       <form>
-        <label htmlFor="catagorySelect">Switch to catagory:  </label>
-        <select onInput={this.switchToCatagory} name="catagorySelect" id="catagorySelect" ref={this.catagorySelectMenu}>
+        <label htmlFor="categorySelect">Switch to category:  </label>
+        <select onInput={this.switchToCategory} name="categorySelect" id="categorySelect" ref={this.categorySelectMenu}>
           <option value="None">None</option>
           {options}
         </select>
       </form>
       <form onSubmit={this.addCategory}>
-        <label htmlFor="fname">Add trail catagory: </label>
-        <input type="text" id="fname" name="fname" onChange={(event) => { this.catagoryToAdd = event.target.value }} />
+        <label htmlFor="fname">Add trail category: </label>
+        <input type="text" id="fname" name="fname" onChange={(event) => { this.categoryToAdd = event.target.value }} />
         <input type="submit" value="Add" />
       </form>
 
       <form>
-        <label htmlFor="catagoryRemove">Remove catagory:   </label>
-        <select name="catagoryRemove" id="catagoryRemove" ref={this.catagoryRemoveMenu}>
+        <label htmlFor="categoryRemove">Remove category:   </label>
+        <select name="categoryRemove" id="categoryRemove" ref={this.categoryRemoveMenu}>
           {options}
         </select>
-        <input onClick={this.removeCatagory} type="submit" value="remove" />
+        <input onClick={this.removeCategory} type="submit" value="remove" />
       </form>
     </>
     )
@@ -457,11 +457,11 @@ class PracticeScreen extends React.Component {
     var appEngine = this.props.appEngine;
     var customStorage = appEngine.getCustomStorage();
     await customStorage.loadDataSizeLimits();
-    var catagorySizeLimit = customStorage.getCategorySizeLimit();
+    var categorySizeLimit = customStorage.getCategorySizeLimit();
     var categoriesArray = appEngine.getTrailCategories();
     var askToPrune = false;
     for (const categoryName of categoriesArray) {
-      if (categoryName.length > catagorySizeLimit) {
+      if (categoryName.length > categorySizeLimit) {
         askToPrune = true;
         break;
       }
@@ -469,12 +469,12 @@ class PracticeScreen extends React.Component {
 
     if (askToPrune) {
       var shouldPrune = window.confirm("One or more of your categories exceeds the maximum number of characters allowed " +
-        "by the custom storage server (" + catagorySizeLimit + " characters) click OK to have the categories" +
+        "by the custom storage server (" + categorySizeLimit + " characters) click OK to have the categories" +
         "removed, click cancel to not switch to the custom storage server");
       if (shouldPrune) {
         for (const categoryName of categoriesArray) {
-          if (categoryName.length > catagorySizeLimit) {
-            appEngine.removeTrailCatagory(categoryName,false);
+          if (categoryName.length > categorySizeLimit) {
+            appEngine.removeTrailCategory(categoryName,false);
           }
         }
       } else { 
@@ -564,13 +564,13 @@ class PracticeScreen extends React.Component {
           <div id="errorConsole">
             {errorElements}
           </div>
-          <TrailCatagoryWidget appEngine={appEngine} />
+          <TrailCategoryWidget appEngine={appEngine} />
 
           <Link to="/about">About this task</Link>
         </div>
         <div id="scoreChart">
           <ScoreChart performenceRecord={appEngine.getPerformanceRecord()}
-            currentCatagory={appEngine.getCurrentCatagory()} />
+            currentCategory={appEngine.getCurrentCategory()} />
         </div>
       </>
     );

@@ -9,15 +9,15 @@ function fillPerfRecord(numOfRecords = 3600) {
     }
 }
 
-function fillCatefories(NumOfCatagories = 17){
+function fillCatefories(NumOfCategories = 17){
     var dummyArray=[];
-    for (var i=0;i<NumOfCatagories;++i) {
-        var catagoryName = 'c'+i.toString().padStart(29,'0');
-        appEngine.addTrailCatagory(catagoryName);
-        dummyArray.push(catagoryName);
+    for (var i=0;i<NumOfCategories;++i) {
+        var categoryName = 'c'+i.toString().padStart(29,'0');
+        appEngine.addTrailCategory(categoryName);
+        dummyArray.push(categoryName);
     }
     const dataStringLength = JSON.stringify(dummyArray).length;
-    if(dataStringLength !== NumOfCatagories*30 + NumOfCatagories*2 + NumOfCatagories+1) {
+    if(dataStringLength !== NumOfCategories*30 + NumOfCategories*2 + NumOfCategories+1) {
         throw Error("this should not happen")
     }
 }

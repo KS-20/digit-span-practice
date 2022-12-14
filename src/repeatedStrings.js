@@ -1,7 +1,7 @@
 const names = {
     dropbox: "Dropbox",
     browserStorage: "Browser Storage",
-    noCatagory: "None",
+    noCategory: "None",
     averageScore: "Average score vs Length of number",
     digitSpanPracticeServer: "Digit Span Practice Server"
 }
@@ -14,8 +14,8 @@ const dbColumnNames = {
     userName: "UserName",
     email: "Email",
     performanceData: "PerformanceData",
-    currentCatagory: "CurrentCatagory",
-    trailCatagories: "TrailCatagories"
+    currentCategory: "CurrentCategory",
+    trailCategories: "TrailCategories"
 }
 
 export {names,serverMsgs,dbColumnNames};

@@ -15,11 +15,11 @@ exports[`Snapshot of initial page 1`] = `
     <div>Trying to load performance data from Dropbox</div>
   </div>
   <div id=\\"errorConsole\\"></div>
-  <form><label for=\\"catagorySelect\\">Switch to catagory: </label><select name=\\"catagorySelect\\" id=\\"catagorySelect\\">
+  <form><label for=\\"categorySelect\\">Switch to category: </label><select name=\\"categorySelect\\" id=\\"categorySelect\\">
       <option value=\\"None\\">None</option>
     </select></form>
-  <form><label for=\\"fname\\">Add trail catagory: </label><input type=\\"text\\" id=\\"fname\\" name=\\"fname\\"><input type=\\"submit\\" value=\\"Add\\"></form>
-  <form><label for=\\"catagoryRemove\\">Remove catagory: </label><select name=\\"catagoryRemove\\" id=\\"catagoryRemove\\"></select><input type=\\"submit\\" value=\\"remove\\"></form><a href=\\"/about\\">About this task</a>
+  <form><label for=\\"fname\\">Add trail category: </label><input type=\\"text\\" id=\\"fname\\" name=\\"fname\\"><input type=\\"submit\\" value=\\"Add\\"></form>
+  <form><label for=\\"categoryRemove\\">Remove category: </label><select name=\\"categoryRemove\\" id=\\"categoryRemove\\"></select><input type=\\"submit\\" value=\\"remove\\"></form><a href=\\"/about\\">About this task</a>
 </div>
 <div id=\\"scoreChart\\">
   <div id=\\"wrapper\\">
@@ -33,7 +33,7 @@ exports[`Snapshot of initial page 1`] = `
         <option value=\\"Average score vs Length of number\\">Average score vs Length of number</option>
         <option value=\\"Success rate\\">Success rate</option>
       </select></form>
-    <p>Showing results for all catagories</p>
+    <p>Showing results for all categories</p>
   </div>
 </div>"
 `;

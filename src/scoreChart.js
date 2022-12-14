@@ -105,13 +105,13 @@ class ScoreChart extends React.Component {
 
   render() {
 
-    var currentCatagory = this.props.currentCatagory;
+    var currentCategory = this.props.currentCategory;
 
-    var catagoryDisplayLine ;
-    if( currentCatagory !== names.noCatagory ) {
-      catagoryDisplayLine = <p id="catagoryDisplayLine">Showing results only for category "{currentCatagory}"</p>;
+    var categoryDisplayLine ;
+    if( currentCategory !== names.noCategory ) {
+      categoryDisplayLine = <p id="categoryDisplayLine">Showing results only for category "{currentCategory}"</p>;
     } else {
-      catagoryDisplayLine = <p>Showing results for all catagories</p>;
+      categoryDisplayLine = <p>Showing results for all categories</p>;
     }
 
     var setNum = 1;
@@ -119,7 +119,7 @@ class ScoreChart extends React.Component {
     var data2 = [];
 
     for (var setRecord of this.props.performenceRecord) {
-      if (currentCatagory === names.noCatagory || setRecord.getCatagory() ===  currentCatagory ) {
+      if (currentCategory === names.noCategory || setRecord.getCategory() ===  currentCategory ) {
         if(this.state.displayMode === names.averageScore){
           data.push([setNum,setRecord.getAverageScore()]);
           data2.push([setNum,setRecord.getMaxScore()]);
@@ -157,7 +157,7 @@ class ScoreChart extends React.Component {
         </select>
       </form>
 
-        {catagoryDisplayLine}
+        {categoryDisplayLine}
       </div>
     );
   }

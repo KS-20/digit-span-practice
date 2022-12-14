@@ -28,8 +28,8 @@ CREATE TABLE `users` (
   `Email` varchar(320) DEFAULT NULL,
   `PerformanceData` mediumtext,
   `HashedPassword` varchar(60) NOT NULL,
-  `CurrentCatagory` varchar(30) DEFAULT NULL,
-  `TrailCatagories` varchar(500) DEFAULT NULL,
+  `CurrentCategory` varchar(30) DEFAULT NULL,
+  `TrailCategories` varchar(500) DEFAULT NULL,
   PRIMARY KEY (`userID`),
   UNIQUE KEY `Email` (`Email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
