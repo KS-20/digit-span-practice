@@ -208,6 +208,13 @@ class App extends React.Component {
   }
 }
 
+function alertCategoriesSize (arrayDataSize, sizeLimit) {
+  alert("The size of storing all the categories in the custom storage server is too big,"+
+  " the size to store is "+arrayDataSize+" characters, but the maximum size is "+
+  sizeLimit);
+}
+
+
 class TrailCategoryWidget extends React.Component {
   constructor(props) {
     super(props);
@@ -237,15 +244,14 @@ class TrailCategoryWidget extends React.Component {
           + categorySizeLimit);
         return;
       }
-    }
-    var categoriesArray = [...appEngine.getTrailCategories()];
-    categoriesArray.push(this.categoryToAdd);
-    var result = longTermStorage.checkCategoriesSize(categoriesArray);
-    if (result.isDataTooBig) {
-      alert("the size of storing all the categories in the custom storage server is too big,"+
-      "the size to store is "+result.arrayDataSize+" characters, but the maximum size is "+
-      result.sizeLimit);
-      return;
+
+      var categoriesArray = [...appEngine.getTrailCategories()];
+      categoriesArray.push(this.categoryToAdd);
+      var result = longTermStorage.checkCategoriesSize(categoriesArray);
+      if (result.isDataTooBig) {
+        alertCategoriesSize(result.arrayDataSize, result.sizeLimit);
+        return;
+      }  
     }
 
     var categorySelectMenu = this.categorySelectMenu.current
@@ -440,6 +446,7 @@ class PracticeScreen extends React.Component {
       appEngine.switchToDropboxStorage();
     } else if (names.digitSpanPracticeServer === sourceToSwitchTo) {
       if ( ! await this.handleSwitchToCustomStorage() ) {
+        this.setStorageTypeMenu(this.storageTypeLastValue);
         return
       };
     } else {
@@ -459,6 +466,13 @@ class PracticeScreen extends React.Component {
     await customStorage.loadDataSizeLimits();
     var categorySizeLimit = customStorage.getCategorySizeLimit();
     var categoriesArray = appEngine.getTrailCategories();
+
+    var result = customStorage.checkCategoriesSize(categoriesArray);
+    if (result.isDataTooBig) {
+      alertCategoriesSize(result.arrayDataSize, result.sizeLimit);
+      return false;
+    }  
+
     var askToPrune = false;
     for (const categoryName of categoriesArray) {
       if (categoryName.length > categorySizeLimit) {
@@ -478,7 +492,6 @@ class PracticeScreen extends React.Component {
           }
         }
       } else { 
-        this.setStorageTypeMenu(this.storageTypeLastValue);
         return false;
       };
     }
