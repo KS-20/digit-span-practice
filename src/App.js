@@ -182,7 +182,7 @@ class LoginPage extends React.Component {
           <p>Password</p>
           <InputForm nameSuffix="_passwordForLogin" onChange={this.setPassword}
             inputType="password" />
-          <input type="submit" value="log in" onClick={this.tryTologin} />
+          <input id="logIn" type="submit" value="log in" onClick={this.tryTologin} />
 
           <Link to="/">Back to main screen</Link>
         </div>
@@ -562,8 +562,8 @@ class PracticeScreen extends React.Component {
           <InputForm nameSuffix="_RepCount" onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
           <button id="saveSettings" type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
           <form>
-            <label htmlFor="dataSource">Save and Load to  </label>
-            <select onInput={this.setStorageTech} name="dataSource" id="dataSource" ref={this.storageTypeMenu}>
+            <label htmlFor="dataStorageSelector">Save and Load to  </label>
+            <select onInput={this.setStorageTech} name="dataStorageSelector" id="dataStorageSelector" ref={this.storageTypeMenu}>
               <option value={names.dropbox}>{names.dropbox}</option>
               <option value={names.browserStorage}>{names.browserStorage}</option>
               <option value={names.digitSpanPracticeServer}>{names.digitSpanPracticeServer}</option>
