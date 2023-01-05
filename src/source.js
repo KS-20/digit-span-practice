@@ -579,6 +579,16 @@ class CustomStorage {
         this.guiController = guiController;
     }
 
+    async deleteAccount() {
+        var requestBody = {
+            requestType: "deleteAccount",
+            accessToken: this.getAccessToken(),
+        }
+        await this.makeRequest("POST", null, requestBody);
+        this.deleteLoginData();
+    }
+
+
     checkCategoriesSize (categoryArray) {
         var result = {};
         result.arrayDataSize = JSON.stringify(categoryArray).length;
@@ -641,9 +651,13 @@ class CustomStorage {
         return this.getUserName() != null;
     }
 
-    logout() {
+    deleteLoginData () {
         window.localStorage.removeItem(CustomStorage.getAccessTokenKey());
         window.localStorage.removeItem(CustomStorage.getUserNameKey());
+    }
+
+    logout() {
+        this.deleteLoginData();
         this.guiController.updateGUI();
     }
 

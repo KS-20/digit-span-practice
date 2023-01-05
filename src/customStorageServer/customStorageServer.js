@@ -116,6 +116,8 @@ http.createServer(async (req, res) => {
         saveCurrentCategory(decodedToken, requestObject, headers, res);
       } else if (requestType == "saveTrailCategories") {
         saveTrailCategories(decodedToken, requestObject, headers, res);
+      } else if (requestType == "deleteAccount"){
+        deleteAccount(decodedToken.userName,headers,res);
       }
     } else if (req.headers.requesttype !== undefined) {
       if (requestType === "getPerformanceRecord") {
@@ -135,6 +137,23 @@ http.createServer(async (req, res) => {
   res.writeHead(405, headers);
   res.end(`${req.method} is not allowed for the request.`);
 }).listen(port);
+
+function deleteAccount(userName,headers,res){
+  db.getConnection(async (err, connection) => {
+    if (err) throw (err)
+    const sqlCommand =  "DELETE FROM users WHERE UserName = ?;"    
+    const formatted_command = mysql.format(sqlCommand, [userName])
+    connection.query(formatted_command, async (err, result) => {
+      if (err) throw (err)
+      const answerObj = { resultStr: "account deleted" };
+      res.writeHead(200, headers);
+      res.end(JSON.stringify(answerObj));
+
+      connection.release()
+    })
+  })
+}
+
 
 function saveTrailCategories(decodedToken, requestObject, headers, res) {
   const categoriesSizeLimit = databaseSizeLimits.get(dbColumnNames.trailCategories);

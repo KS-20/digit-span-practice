@@ -191,6 +191,23 @@ class LoginPage extends React.Component {
   }
 }
 
+class AccountPage extends React.Component {
+
+  deleteAccount = async (event) => {
+    var customStorage = this.props.appEngine.getCustomStorage();
+    await customStorage.deleteAccount();
+    window.location.href = '/';
+  }
+
+  render() {
+    return (
+      <>
+      <button id="deleteAccount" type="button" onClick={this.deleteAccount} >delete account</button>
+      </>
+    )
+  }
+}
+
 
 
 class App extends React.Component {
@@ -202,7 +219,7 @@ class App extends React.Component {
           <Route path="/about" element={<AboutPage />} />
           <Route path="/signup" element={<SignUpPage appEngine={this.props.appEngine} />} />
           <Route path="/login" element={<LoginPage appEngine={this.props.appEngine} />} />
-
+          <Route path="/accountOptions" element={<AccountPage appEngine={this.props.appEngine} />} />
         </Routes>
       </Router>)
   }
@@ -342,14 +359,19 @@ class CustomStorageControls extends React.Component {
     this.props.customStorage.logout();
   }
 
+  accountOptions = () => {
+    window.location.href = '/accountOptions';
+  }
+
+
   render() {
     var customStorage = this.props.customStorage;
     var elementToRender;
     if (customStorage.isLoggedIn()) {
       elementToRender = <div className="CustomStorageControls">
         <label>logged in as: {customStorage.getUserName()} </label>
-        <button id="logout" type="button" onClick={this.logout} >
-          Log out</button>
+        <button id="logout" type="button" onClick={this.logout} >Log out</button>
+        <button id="accountOptions" type="button" onClick={this.accountOptions} >Account Options</button>
       </div>
     } else {
       elementToRender = <div className="CustomStorageControls">
