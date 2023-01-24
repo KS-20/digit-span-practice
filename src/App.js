@@ -133,7 +133,7 @@ class SignUpPage extends React.Component {
           <p>Password</p>
           <InputForm nameSuffix="_passwordForSignUp" onChange={this.setPassword}
             inputType="password" />
-          <input type="submit" value="Sign up" onClick={this.tryToSignUp} />
+          <input id="submitSignUp" type="submit" value="Sign up" onClick={this.tryToSignUp} />
 
           <Link to="/">Back to main screen</Link>
         </div>
@@ -370,13 +370,13 @@ class CustomStorageControls extends React.Component {
     if (customStorage.isLoggedIn()) {
       elementToRender = <div className="CustomStorageControls">
         <label>logged in as: {customStorage.getUserName()} </label>
-        <button id="logout" type="button" onClick={this.logout} >Log out</button>
+        <button id="logOut" type="button" onClick={this.logout} >Log out</button>
         <button id="accountOptions" type="button" onClick={this.accountOptions} >Account Options</button>
       </div>
     } else {
       elementToRender = <div className="CustomStorageControls">
         <button id="signIn" type="button" onClick={this.login} >Log In</button>
-        <button id="login" type="button" onClick={this.signUp} >Sign Up</button>
+        <button id="signUp" type="button" onClick={this.signUp} >Sign Up</button>
       </div>;
     }
     return (
