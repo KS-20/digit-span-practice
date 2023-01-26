@@ -190,11 +190,15 @@ class AppEngine {
     async loadLongTermStorage() {
         try {
             this.guiController.setErrorMessage("");
-            if (this.longTermStorage instanceof CustomStorage) {
+            const isUsingCustomStorage = this.longTermStorage instanceof CustomStorage;
+            if (isUsingCustomStorage) {
                 await this.longTermStorage.loadDataSizeLimits();
             }
             await this.loadPerfRecord();
             await this.loadCategoryData();
+            if (isUsingCustomStorage) {
+                this.guiController.notifyCustomStorageLoaded();
+            }
         } catch (e) {
             this.guiController.setSavingStatusLine("");
             this.processException(e);
@@ -926,6 +930,10 @@ class ReactGui {
 
     setSavingStatusLine(msg) {
         this.appComponent.setState({ savingStatusLine: msg });
+    }
+
+    notifyCustomStorageLoaded () {
+        this.appComponent.setState({ isCustomStorageLoaded: true });
     }
 
     setStorageTypeMenu(storageTypeStr) {

@@ -368,10 +368,15 @@ class CustomStorageControls extends React.Component {
     var customStorage = this.props.customStorage;
     var elementToRender;
     if (customStorage.isLoggedIn()) {
+      var displayMsg = <></>
+      if(this.props.isCustomStorageLoaded) {
+        displayMsg = <p id="customServerMsg">Done loading data</p>;
+      }
       elementToRender = <div className="CustomStorageControls">
         <label>logged in as: {customStorage.getUserName()} </label>
         <button id="logOut" type="button" onClick={this.logout} >Log out</button>
         <button id="accountOptions" type="button" onClick={this.accountOptions} >Account Options</button>
+        {displayMsg}
       </div>
     } else {
       elementToRender = <div className="CustomStorageControls">
@@ -555,7 +560,8 @@ class PracticeScreen extends React.Component {
     var appEngine = this.props.appEngine;
     var custonStorageControls = "";
     if (this.state.isUsingCustomStorage) {
-      custonStorageControls = <CustomStorageControls customStorage={appEngine.getCustomStorage()} />
+      custonStorageControls = <CustomStorageControls customStorage={appEngine.getCustomStorage()}
+        isCustomStorageLoaded = {this.state.isCustomStorageLoaded}  />
     }
     if (this.state.isInputMode) {
       mainDisplay = <InputForm nameSuffix="_Digits" focusOnStart onSubmit={this.checkAnswer} />;

@@ -47,3 +47,10 @@ type and size of the screen*/
     margin-left: 10px;
     margin-right: 10px;
 }
+
+#customServerMsg {
+    margin-top: 0;
+    margin-bottom: 0 ;
+    margin-left: 1ex;
+    color: green;
+}

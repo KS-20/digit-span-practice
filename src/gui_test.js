@@ -102,9 +102,10 @@ async function customServerTest(driver) {
   await driver.switchTo().alert().accept();
 
   await basicTest(driver);
-  checkPerformanceData(driver);
-  // await driver.navigate().refresh();
-  // checkPerformanceData(driver);
+  await checkPerformanceData(driver);
+  await driver.navigate().refresh();
+  await driver.wait(until.elementLocated(By.id('customServerMsg')), 10 * 1000)
+  await checkPerformanceData(driver);
 
   await driver.wait(until.elementLocated(By.id('accountOptions')), 10 * 1000)
   await driver.findElement(By.id("accountOptions")).click();
@@ -116,7 +117,6 @@ async function customServerTest(driver) {
 async function checkPerformanceData(driver) {
   const expectedString = "{\"perfRecordArray\":[{\"setRecordArray\":[\"2\"],\"category\":\"\",\"maxScore\":\"2\",\"minSuccessScore\":\"2\"}]}";
   const performanceDataStr =  await getPerfString(driver);
-
   assert(performanceDataStr, expectedString);
 }
 
