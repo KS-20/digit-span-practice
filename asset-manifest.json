@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/digit-span-practice/static/css/main.f835ab8d.css",
+    "main.js": "/digit-span-practice/static/js/main.e604acea.js",
+    "static/js/787.1c82b53d.chunk.js": "/digit-span-practice/static/js/787.1c82b53d.chunk.js",
+    "index.html": "/digit-span-practice/index.html",
+    "main.f835ab8d.css.map": "/digit-span-practice/static/css/main.f835ab8d.css.map",
+    "main.e604acea.js.map": "/digit-span-practice/static/js/main.e604acea.js.map",
+    "787.1c82b53d.chunk.js.map": "/digit-span-practice/static/js/787.1c82b53d.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.f835ab8d.css",
+    "static/js/main.e604acea.js"
+  ]
+}
