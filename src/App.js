@@ -3,10 +3,10 @@ import ScoreChart from './scoreChart.js'
 import './mystyle.css'
 import { names } from './repeatedStrings.js'
 import {
-  BrowserRouter as Router,
+  HashRouter as Router, //Need a hash router so it would work with github pages, see: https://www.freecodecamp.org/news/deploy-a-react-app-to-github-pages/
   Routes,
   Route,
-  Link
+  Link,
 } from "react-router-dom";
 
 class InputForm extends React.Component {
@@ -348,11 +348,13 @@ class TrailCategoryWidget extends React.Component {
 class CustomStorageControls extends React.Component {
 
   signUp = () => {
-    window.location.href = '/signup';
+    // window.location.href = '/signup';
+    window.location.href="#/signup" 
   }
 
   login = () => {
-    window.location.href = '/login';
+    // window.location.href = '/login';
+    window.location.href="#/login";
   }
 
   logout = () => {
@@ -360,7 +362,7 @@ class CustomStorageControls extends React.Component {
   }
 
   accountOptions = () => {
-    window.location.href = '/accountOptions';
+    window.location.href = '#/accountOptions';
   }
 
 

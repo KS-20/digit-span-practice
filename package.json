@@ -2,7 +2,7 @@
   "name": "digit-span-practice",
   "version": "0.1.0",
   "private": true,
-  "homepage": ".",
+  "homepage": "https://KS-20.github.io/digit-span-practice",
   "type": "module",
   "dependencies": {
     "@testing-library/jest-dom": "^5.16.4",
@@ -14,6 +14,7 @@
     "crypto-browserify": "^3.12.0",
     "dotenv": "^16.0.1",
     "dropbox": "^10.29.0",
+    "gh-pages": "^5.0.0",
     "jsonwebtoken": "^8.5.1",
     "mysql2": "^2.3.3",
     "pretty": "^2.0.0",
@@ -28,6 +29,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
