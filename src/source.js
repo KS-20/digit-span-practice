@@ -91,6 +91,11 @@ class PerformanceRecord {
     }
 }
 
+function serverConnectErrAlert (errorMessage) {
+    alert("Error trying to connect to custom server, check if the server is online,"+ 
+    "the error message recieved is: \""+errorMessage+"\"");
+}
+
 class AppEngine {
     constructor(guiController) {
         this.numToRecall = "";
@@ -164,6 +169,11 @@ class AppEngine {
     }
 
     async onPageLoad() {
+        if(this.pageWasLoaded) {
+            return 
+        } else {
+            this.pageWasLoaded = true;
+        }
         if (localStorage.numOfDigits) {
             this.guiController.initNumOfDigits(localStorage.numOfDigits);
         } else {
@@ -192,7 +202,11 @@ class AppEngine {
             this.guiController.setErrorMessage("");
             const isUsingCustomStorage = this.longTermStorage instanceof CustomStorage;
             if (isUsingCustomStorage) {
-                await this.longTermStorage.loadDataSizeLimits();
+                const responseJson = await this.longTermStorage.loadDataSizeLimits();
+                if (responseJson.makeRequestError) {
+                    this.switchToBrowserStorage();
+                    serverConnectErrAlert(responseJson.makeRequestError);
+                }
             }
             await this.loadPerfRecord();
             await this.loadCategoryData();
@@ -593,10 +607,10 @@ class CustomStorage {
     }
 
 
-    checkCategoriesSize (categoryArray) {
+    checkCategoriesSize(categoryArray) {
         var result = {};
         result.arrayDataSize = JSON.stringify(categoryArray).length;
-        result.sizeLimit = this.dataSizeLimits[dbColumnNames.trailCategories] ;
+        result.sizeLimit = this.dataSizeLimits[dbColumnNames.trailCategories];
         result.isDataTooBig = result.arrayDataSize > result.sizeLimit;
         return result;
     }
@@ -655,7 +669,7 @@ class CustomStorage {
         return this.getUserName() != null;
     }
 
-    deleteLoginData () {
+    deleteLoginData() {
         window.localStorage.removeItem(CustomStorage.getAccessTokenKey());
         window.localStorage.removeItem(CustomStorage.getUserNameKey());
     }
@@ -701,6 +715,7 @@ class CustomStorage {
 
             }).catch(error => {
                 console.error(error);
+                return { makeRequestError: error }
             });
 
         return responseJson;
@@ -712,6 +727,7 @@ class CustomStorage {
         }
         const responseJson = await this.makeRequest("GET", requestHeader, null, false);
         this.dataSizeLimits = responseJson.dataSizeLimits;
+        return responseJson;
     }
 
     getCategorySizeLimit() {
@@ -932,7 +948,7 @@ class ReactGui {
         this.appComponent.setState({ savingStatusLine: msg });
     }
 
-    notifyCustomStorageLoaded () {
+    notifyCustomStorageLoaded() {
         this.appComponent.setState({ isCustomStorageLoaded: true });
     }
 
@@ -955,4 +971,4 @@ class ReactGui {
 
 var appEngine = new AppEngine(new ReactGui());
 
-export { appEngine, SetRecord };
+export { appEngine, SetRecord, serverConnectErrAlert };

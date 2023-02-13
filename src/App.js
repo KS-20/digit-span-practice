@@ -8,6 +8,8 @@ import {
   Route,
   Link,
 } from "react-router-dom";
+import { serverConnectErrAlert } from './source.js'
+
 
 class InputForm extends React.Component {
   constructor(props) {
@@ -492,7 +494,11 @@ class PracticeScreen extends React.Component {
   handleSwitchToCustomStorage = async () => {
     var appEngine = this.props.appEngine;
     var customStorage = appEngine.getCustomStorage();
-    await customStorage.loadDataSizeLimits();
+    const responseJson =  await customStorage.loadDataSizeLimits();
+    if(responseJson.makeRequestError) {
+      serverConnectErrAlert(responseJson.makeRequestError);
+      return false;
+    } 
     var categorySizeLimit = customStorage.getCategorySizeLimit();
     var categoriesArray = appEngine.getTrailCategories();
 
