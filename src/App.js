@@ -198,7 +198,6 @@ class AccountPage extends React.Component {
   deleteAccount = async (event) => {
     var customStorage = this.props.appEngine.getCustomStorage();
     await customStorage.deleteAccount();
-    window.location.href = '/';
   }
 
   render() {

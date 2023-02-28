@@ -15,7 +15,13 @@ function assert(actual, expected) {
 async function testList() {
   let driver = await new Builder().forBrowser('firefox').build();
   try {
-    await driver.get("http://localhost:3000/");
+    var addressToTest;
+    if (process.argv[2]) {
+      addressToTest = "https://KS-20.github.io/digit-span-practice"
+    } else {
+      addressToTest = "http://localhost:3000/";
+    }
+    await driver.get(addressToTest);
     await customServerTest(driver);
     console.log("Finished");
   } finally {
@@ -53,7 +59,7 @@ async function basicTest(driver) {
   assert("succeeded in 1 out of 1", finalMessage);
 }
 
-async function signUp(driver,USER_NAME_FOR_TEST,USER_FOR_TEST_PASSWORD) {
+async function signUp(driver, USER_NAME_FOR_TEST, USER_FOR_TEST_PASSWORD) {
   await driver.findElement(By.id("signUp")).click();
 
   var userNameElem = driver.findElement(By.name("input_userNameForSignUp"));
@@ -68,7 +74,7 @@ async function signUp(driver,USER_NAME_FOR_TEST,USER_FOR_TEST_PASSWORD) {
   await driver.switchTo().alert().accept();
 }
 
-async function getPerfString(driver){
+async function getPerfString(driver) {
   return await driver.executeScript(() => {
     return JSON.stringify(window.appEngine.getPerformanceRecord())
   })
@@ -84,7 +90,7 @@ async function customServerTest(driver) {
   const USER_NAME_FOR_TEST = process.env.USER_NAME_FOR_TEST;
   const USER_FOR_TEST_PASSWORD = process.env.USER_FOR_TEST_PASSWORD;
 
-  await signUp(driver,USER_NAME_FOR_TEST,USER_FOR_TEST_PASSWORD);
+  await signUp(driver, USER_NAME_FOR_TEST, USER_FOR_TEST_PASSWORD);
 
   await driver.wait(until.elementLocated(By.id('logOut')), 10 * 1000)
   await driver.findElement(By.id("logOut")).click();
@@ -116,7 +122,7 @@ async function customServerTest(driver) {
 
 async function checkPerformanceData(driver) {
   const expectedString = "{\"perfRecordArray\":[{\"setRecordArray\":[\"2\"],\"category\":\"\",\"maxScore\":\"2\",\"minSuccessScore\":\"2\"}]}";
-  const performanceDataStr =  await getPerfString(driver);
+  const performanceDataStr = await getPerfString(driver);
   assert(performanceDataStr, expectedString);
 }
 

@@ -604,6 +604,7 @@ class CustomStorage {
         }
         await this.makeRequest("POST", null, requestBody);
         this.deleteLoginData();
+        this.guiController.goToMainScreen();
     }
 
 
@@ -965,7 +966,7 @@ class ReactGui {
     }
 
     goToMainScreen() {
-        window.location.href = '/';
+        window.location.hash="/";
     }
 }
 
