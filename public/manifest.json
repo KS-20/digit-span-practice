@@ -1,4 +1,5 @@
 {
+  "id": "Digit Span Practice ID",
   "short_name": "Digit Span",
   "name": "Digit Span Practice",
   "icons": [
@@ -18,7 +19,7 @@
       "sizes": "512x512"
     }
   ],
-  "start_url": ".",
+  "start_url": "./?mode=standalone",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "#ffffff"

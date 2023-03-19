@@ -25,6 +25,7 @@
     "react-scripts": "5.0.1",
     "selenium-webdriver": "^4.8.1",
     "stream-browserify": "^3.0.0",
+    "sweetalert": "^2.1.2",
     "util": "^0.12.5",
     "web-vitals": "^2.1.4",
     "workbox-core": "^6.5.4",

@@ -9,6 +9,7 @@ import {
   Link,
 } from "react-router-dom";
 import { serverConnectErrAlert } from './source.js'
+import swal from 'sweetalert'
 
 
 class InputForm extends React.Component {
@@ -203,7 +204,7 @@ class AccountPage extends React.Component {
   render() {
     return (
       <>
-      <button id="deleteAccount" type="button" onClick={this.deleteAccount} >delete account</button>
+        <button id="deleteAccount" type="button" onClick={this.deleteAccount} >delete account</button>
       </>
     )
   }
@@ -226,10 +227,10 @@ class App extends React.Component {
   }
 }
 
-function alertCategoriesSize (arrayDataSize, sizeLimit) {
-  alert("The size of storing all the categories in the custom storage server is too big,"+
-  " the size to store is "+arrayDataSize+" characters, but the maximum size is "+
-  sizeLimit);
+function alertCategoriesSize(arrayDataSize, sizeLimit) {
+  alert("The size of storing all the categories in the custom storage server is too big," +
+    " the size to store is " + arrayDataSize + " characters, but the maximum size is " +
+    sizeLimit);
 }
 
 
@@ -269,7 +270,7 @@ class TrailCategoryWidget extends React.Component {
       if (result.isDataTooBig) {
         alertCategoriesSize(result.arrayDataSize, result.sizeLimit);
         return;
-      }  
+      }
     }
 
     var categorySelectMenu = this.categorySelectMenu.current
@@ -350,12 +351,12 @@ class CustomStorageControls extends React.Component {
 
   signUp = () => {
     // window.location.href = '/signup';
-    window.location.href="#/signup" 
+    window.location.href = "#/signup"
   }
 
   login = () => {
     // window.location.href = '/login';
-    window.location.href="#/login";
+    window.location.href = "#/login";
   }
 
   logout = () => {
@@ -372,7 +373,7 @@ class CustomStorageControls extends React.Component {
     var elementToRender;
     if (customStorage.isLoggedIn()) {
       var displayMsg = <></>
-      if(this.props.isCustomStorageLoaded) {
+      if (this.props.isCustomStorageLoaded) {
         displayMsg = <p id="customServerMsg">Done loading data</p>;
       }
       elementToRender = <div className="CustomStorageControls">
@@ -403,36 +404,11 @@ class PracticeScreen extends React.Component {
       numToRecall: '12345', isInputMode: true, savingStatusLine: "",
       isUsingCustomStorage: this.props.appEngine.isUsingCustomStorage()
     };
-    this.requestAccessCode = false;
     this.startButton = React.createRef();
     this.saveSettingButton = React.createRef();
     this.storageTypeMenu = React.createRef();
 
     this.setUpDropbox = this.setUpDropbox.bind(this);
-    this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
-
-    document.removeEventListener("visibilitychange", document._visibilityEventHandler);
-    document.addEventListener("visibilitychange", this.handleVisibilityChange);
-    document._visibilityEventHandler = this.handleVisibilityChange;
-
-  }
-
-  // window.prompt does not open in chrome when it's not the active tab (at least on certain conditions)
-  // so we wait for the window to become visible, this is the error: https://chromestatus.com/feature/5637107137642496
-  async handleVisibilityChange() {
-    if (this.requestAccessCode && document.visibilityState === "visible") {
-      this.requestAccessCode = false;
-      var appEngine = this.props.appEngine;
-      var dropboxStorage = appEngine.getDropboxStorage();
-      var accessCode = prompt("Enter the access code provided by dropbox:");
-      try {
-        await dropboxStorage.generateAccessToken(accessCode);
-        await appEngine.loadPerfRecord();
-      } catch (e) {
-        this.setState({ savingStatusLine: "" });
-        appEngine.processException(e);
-      }
-    }
   }
 
   focusStartButton = () => {
@@ -450,7 +426,26 @@ class PracticeScreen extends React.Component {
     await this.props.appEngine.onPageLoad();
     this.forceUpdate();
     this.startButton.current.disabled = false;
+    this.setIsPWA();
   }
+
+  setIsPWA() {
+    const isPwaKey = this.getIsPwaKey();
+    const queryString = window.location.search;
+    const params = new URLSearchParams(queryString);
+    // using start_url is recommended to detect a PWA yet start_url is considered advisory , see https://developer.mozilla.org/en-US/docs/Web/Manifest/start_url and https://web.dev/learn/pwa/detection/ 
+    if (window.matchMedia('(display-mode: standalone)').matches || params.get("mode") === 'standalone') {
+      sessionStorage.setItem(isPwaKey, "1");
+    }
+  }
+
+  getIsPwaKey() { return "IsPWA?" }
+
+  isPWA() {
+    const isPwaKey = this.getIsPwaKey();
+    return sessionStorage.getItem(isPwaKey);
+  }
+
   checkAnswer = (input) => {
     var appEngine = this.props.appEngine;
     appEngine.getGuiController().setInput(input);
@@ -475,7 +470,7 @@ class PracticeScreen extends React.Component {
     } else if (names.dropbox === sourceToSwitchTo) {
       appEngine.switchToDropboxStorage();
     } else if (names.digitSpanPracticeServer === sourceToSwitchTo) {
-      if ( ! await this.handleSwitchToCustomStorage() ) {
+      if (! await this.handleSwitchToCustomStorage()) {
         this.setStorageTypeMenu(this.storageTypeLastValue);
         return
       };
@@ -483,7 +478,7 @@ class PracticeScreen extends React.Component {
       console.error("Invalid string");
     }
 
-    if ( !appEngine.isUsingCustomStorage() ) {
+    if (!appEngine.isUsingCustomStorage()) {
       this.setState({ isUsingCustomStorage: false });
     }
     await appEngine.saveEverything();
@@ -493,11 +488,11 @@ class PracticeScreen extends React.Component {
   handleSwitchToCustomStorage = async () => {
     var appEngine = this.props.appEngine;
     var customStorage = appEngine.getCustomStorage();
-    const responseJson =  await customStorage.loadDataSizeLimits();
-    if(responseJson.makeRequestError) {
+    const responseJson = await customStorage.loadDataSizeLimits();
+    if (responseJson.makeRequestError) {
       serverConnectErrAlert(responseJson.makeRequestError);
       return false;
-    } 
+    }
     var categorySizeLimit = customStorage.getCategorySizeLimit();
     var categoriesArray = appEngine.getTrailCategories();
 
@@ -505,7 +500,7 @@ class PracticeScreen extends React.Component {
     if (result.isDataTooBig) {
       alertCategoriesSize(result.arrayDataSize, result.sizeLimit);
       return false;
-    }  
+    }
 
     var askToPrune = false;
     for (const categoryName of categoriesArray) {
@@ -522,10 +517,10 @@ class PracticeScreen extends React.Component {
       if (shouldPrune) {
         for (const categoryName of categoriesArray) {
           if (categoryName.length > categorySizeLimit) {
-            appEngine.removeTrailCategory(categoryName,false);
+            appEngine.removeTrailCategory(categoryName, false);
           }
         }
-      } else { 
+      } else {
         return false;
       };
     }
@@ -556,10 +551,28 @@ class PracticeScreen extends React.Component {
     this.AdjustDisableStatus();
   }
 
+  sweetAlertPrompt = async () => {
+    const result = await swal({
+      text: 'Enter the access code provided by dropbox:',
+      buttons: true,
+      content: "input",
+    })
+    return result;
+  }
+
   async setUpDropbox() {
     var dropboxStorage = this.props.appEngine.getDropboxStorage();
     await dropboxStorage.doAuthentication();
-    this.requestAccessCode = true;
+    var appEngine = this.props.appEngine;
+    var accessCode = await this.sweetAlertPrompt();   // window.prompt does not open in chrome when it's not the active tab (at least on certain conditions) , so we will use sweetalert,  this is the error: https://chromestatus.com/feature/5637107137642496
+    if(!accessCode) return;
+    try {
+      await dropboxStorage.generateAccessToken(accessCode);
+      await appEngine.loadPerfRecord();
+    } catch (e) {
+      this.setState({ savingStatusLine: "" });
+      appEngine.processException(e);
+    }
   }
 
   render() {
@@ -568,7 +581,7 @@ class PracticeScreen extends React.Component {
     var custonStorageControls = "";
     if (this.state.isUsingCustomStorage) {
       custonStorageControls = <CustomStorageControls customStorage={appEngine.getCustomStorage()}
-        isCustomStorageLoaded = {this.state.isCustomStorageLoaded}  />
+        isCustomStorageLoaded={this.state.isCustomStorageLoaded} />
     }
     if (this.state.isInputMode) {
       mainDisplay = <InputForm nameSuffix="_Digits" focusOnStart onSubmit={this.checkAnswer} />;
