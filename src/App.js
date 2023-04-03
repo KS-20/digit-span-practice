@@ -565,7 +565,7 @@ class PracticeScreen extends React.Component {
     await dropboxStorage.doAuthentication();
     var appEngine = this.props.appEngine;
     var accessCode = await this.sweetAlertPrompt();   // window.prompt does not open in chrome when it's not the active tab (at least on certain conditions) , so we will use sweetalert,  this is the error: https://chromestatus.com/feature/5637107137642496
-    if(!accessCode) return;
+    if (!accessCode) return;
     try {
       await dropboxStorage.generateAccessToken(accessCode);
       await appEngine.loadPerfRecord();
@@ -584,7 +584,8 @@ class PracticeScreen extends React.Component {
         isCustomStorageLoaded={this.state.isCustomStorageLoaded} />
     }
     if (this.state.isInputMode) {
-      mainDisplay = <InputForm nameSuffix="_Digits" focusOnStart onSubmit={this.checkAnswer} />;
+      mainDisplay = <InputForm nameSuffix="_Digits" focusOnStart onSubmit={this.checkAnswer}
+        inputType="number" />;
     } else {
       mainDisplay = <p id="numConsole">{this.state.numToRecall}</p>;
     }
@@ -605,9 +606,11 @@ class PracticeScreen extends React.Component {
             ref={this.startButton}>
             start practice </button>
           <p>Length of number:</p>
-          <InputForm nameSuffix="_NumLen" onChange={this.setNumLengthField} defaultValue={this.state.defaultNumSize} />
+          <InputForm nameSuffix="_NumLen" onChange={this.setNumLengthField} inputType="number"
+            defaultValue={this.state.defaultNumSize} />
           <p>Number of reps:</p>
-          <InputForm nameSuffix="_RepCount" onChange={this.setNumOfRepsField} defaultValue={this.state.defaultRepNum} />
+          <InputForm nameSuffix="_RepCount" onChange={this.setNumOfRepsField} inputType="number"
+            defaultValue={this.state.defaultRepNum} />
           <button id="saveSettings" type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
           <form>
             <label htmlFor="dataStorageSelector">Save and Load to  </label>
