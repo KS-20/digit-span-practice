@@ -14,12 +14,12 @@ class ScoreChart extends React.Component {
     */
 
     this.displaySelectMenu = React.createRef();
+    const smallDeviceWidth = 768
 
     var mainGraphOptions = {
       chart: {
         id: 'chart2',
         type: 'line',
-        height: 230,
         toolbar: {
           autoSelected: 'pan',
           show: false
@@ -46,13 +46,23 @@ class ScoreChart extends React.Component {
         labels: {
           show: true
         }
-      }
+      },
+      responsive: [
+        {
+          breakpoint: smallDeviceWidth,
+          options: {
+            chart: {
+              height: 'auto',
+              width: 250
+            },      
+          }
+        }
+      ]
     }
 
     var outlineGraphOptions = {
       chart: {
         id: 'chart1',
-        height: 50,
         type: 'area',
         brush: {
           target: 'chart2',
@@ -88,7 +98,18 @@ class ScoreChart extends React.Component {
       },
       yaxis: {
         tickAmount: 2
-      }
+      },
+      responsive: [
+        {
+          breakpoint: smallDeviceWidth,
+          options: {
+            chart: {
+              height: 'auto',
+              width: 250
+            },      
+          }
+        }
+      ]
     }
 
     this.state = {
@@ -142,12 +163,12 @@ class ScoreChart extends React.Component {
     }]
 
     return (
-      <div id="wrapper">
-        <div id="chart-line2">
+      <div id="chartsArea">
+        <div id="detailed-chart">
           <ReactApexChart options={this.state.options} series={series} type="line" height={"120px"} width={"600px"} />
         </div>
-        <div id="chart-line">
-          <ReactApexChart options={this.state.optionsLine} series={seriesLine} type="area" height={"120px"} width={"600px"} />
+        <div id="overview-chart">
+          <ReactApexChart options={this.state.optionsLine} series={seriesLine} type="area" height={"120px"} width={"600px"}/>
         </div>
         <form>
         <label htmlFor="displaySelect">Show in graph:  </label>
