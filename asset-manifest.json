@@ -1,16 +1,16 @@
 {
   "files": {
     "main.css": "/digit-span-practice/static/css/main.f835ab8d.css",
-    "main.js": "/digit-span-practice/static/js/main.92fc64d0.js",
-    "static/js/787.1c82b53d.chunk.js": "/digit-span-practice/static/js/787.1c82b53d.chunk.js",
+    "main.js": "/digit-span-practice/static/js/main.5c1923b3.js",
+    "static/js/496.b1e0fb46.chunk.js": "/digit-span-practice/static/js/496.b1e0fb46.chunk.js",
     "service-worker.js": "/digit-span-practice/service-worker.js",
     "index.html": "/digit-span-practice/index.html",
     "main.f835ab8d.css.map": "/digit-span-practice/static/css/main.f835ab8d.css.map",
-    "main.92fc64d0.js.map": "/digit-span-practice/static/js/main.92fc64d0.js.map",
-    "787.1c82b53d.chunk.js.map": "/digit-span-practice/static/js/787.1c82b53d.chunk.js.map"
+    "main.5c1923b3.js.map": "/digit-span-practice/static/js/main.5c1923b3.js.map",
+    "496.b1e0fb46.chunk.js.map": "/digit-span-practice/static/js/496.b1e0fb46.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.f835ab8d.css",
-    "static/js/main.92fc64d0.js"
+    "static/js/main.5c1923b3.js"
   ]
 }
