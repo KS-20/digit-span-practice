@@ -91,9 +91,9 @@ class PerformanceRecord {
     }
 }
 
-function serverConnectErrAlert (errorMessage) {
-    alert("Error trying to connect to custom server, check if the server is online,"+ 
-    "the error message recieved is: \""+errorMessage+"\"");
+function serverConnectErrAlert(errorMessage) {
+    alert("Error trying to connect to custom server, check if the server is online," +
+        "the error message recieved is: \"" + errorMessage + "\"");
 }
 
 class AppEngine {
@@ -169,8 +169,8 @@ class AppEngine {
     }
 
     async onPageLoad() {
-        if(this.pageWasLoaded) {
-            return 
+        if (this.pageWasLoaded) {
+            return
         } else {
             this.pageWasLoaded = true;
         }
@@ -294,6 +294,11 @@ class AppEngine {
     isUsingCustomStorage() {
         return localStorage.getItem("storageType") === names.digitSpanPracticeServer;
     };
+
+    isUsingDropboxStorage() {
+        return localStorage.getItem("storageType") === names.dropbox;
+    };
+
 
     async saveEverything() {
         try {
@@ -423,13 +428,17 @@ class DropboxStorage {
         this.guiController = guiController;
     }
 
+    static getCategoriesArrayFN() {
+        return "digit_span_categories_array.json";
+    }
+
     async saveTrailCategories(categoriesArray) {
         this.guiController.setSavingStatusLine("Trying to upload data to Dropbox");
         this.setUpDbx();
         var fileContent = JSON.stringify(categoriesArray);
         var args = {
             contents: fileContent,
-            path: "/digit_span_categories_array.json",
+            path: "/"+DropboxStorage.getCategoriesArrayFN(),
             mode: { ".tag": "overwrite" },
             autorename: true,
             mute: true,
@@ -441,13 +450,17 @@ class DropboxStorage {
         this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
     }
 
+    static getCurrentCategoryFN () {
+        return "digit_span_current_category.json";
+    }
+
     async saveCurrentCategory(currentCategory) {
         this.guiController.setSavingStatusLine("Trying to upload data to Dropbox");
         this.setUpDbx();
         var fileContent = JSON.stringify(currentCategory);
         var args = {
             contents: fileContent,
-            path: "/digit_span_current_category.json",
+            path: "/"+DropboxStorage.getCurrentCategoryFN(),
             mode: { ".tag": "overwrite" },
             autorename: true,
             mute: true,
@@ -463,7 +476,7 @@ class DropboxStorage {
         var startingStatusLine = "Trying to load current category from Dropbox";
         var endingStatusLine = "Current category loaded successfully from Dropbox";
         var infoNotFoundMsg = "Current category information not found in Dropbox";
-        var fileName = "digit_span_current_category.json";
+        var fileName = DropboxStorage.getCurrentCategoryFN();
         const jsonString = await this.downloadFromDropbox(startingStatusLine, endingStatusLine, infoNotFoundMsg, fileName);
         if (jsonString == null) {
             return names.noCategory;
@@ -473,11 +486,15 @@ class DropboxStorage {
         }
     }
 
+    static getPerRecordFN() {
+        return "digit_span_perf_record.json";
+    }
+
     async loadPerfRecord() {
         var startingStatusLine = "Trying to load performance data from Dropbox";
         var endingStatusLine = "Performance data from Dropbox loaded successfully";
         var infoNotFoundMsg = "Performance data not found in Dropbox";
-        var fileName = "digit_span_perf_record.json";
+        var fileName = DropboxStorage.getPerRecordFN();
         const jsonString = await this.downloadFromDropbox(startingStatusLine, endingStatusLine, infoNotFoundMsg, fileName);
         var performanceRecord = new PerformanceRecord();
         if (jsonString != null) {
@@ -513,7 +530,7 @@ class DropboxStorage {
         var startingStatusLine = "Trying to load list of categories from Dropbox";
         var endingStatusLine = "list of categories loaded successfully from Dropbox";
         var infoNotFoundMsg = "Performance data not found in Dropbox";
-        var fileName = "digit_span_categories_array.json";
+        var fileName = DropboxStorage.getCategoriesArrayFN();
         const jsonString = await this.downloadFromDropbox(startingStatusLine, endingStatusLine, infoNotFoundMsg, fileName);
         if (jsonString == null) {
             return [];
@@ -579,7 +596,7 @@ class DropboxStorage {
         var fileContent = JSON.stringify(performanceRecord);
         var args = {
             contents: fileContent,
-            path: "/digit_span_perf_record.json",
+            path: "/"+DropboxStorage.getPerRecordFN(),
             mode: { ".tag": "overwrite" },
             autorename: true,
             mute: true,
@@ -589,6 +606,102 @@ class DropboxStorage {
 
         await this.dbx.filesUpload(args);
         this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
+    }
+
+    async checkFolderExists(path) {
+        const args = { path: path };
+        try {
+            await this.dbx.filesGetMetadata(args);
+            return true;
+        } catch (e) {
+            if (e.error && e.error && e.error.error && e.error.error.path &&
+                e.error.error.path[".tag"] === "not_found") return false;
+            throw e;
+        }
+    }
+
+    getNamedRecordsDN () {
+        return "/namedRecords";
+    }
+
+    async getSavedRecordsList () {
+        this.setUpDbx();
+        const namedRecordsDirName = this.getNamedRecordsDN();
+        const arg = {path: namedRecordsDirName};
+        const result = await this.dbx.filesListFolder(arg);
+        var entriesFullList = [];
+        for (var entry of result.result.entries) {
+            entriesFullList.push(entry.name);
+        }
+        var hasMore = result.result.has_more;
+        var cursor = result.result.cursor;
+        while(hasMore) {
+            const result = await this.dbx.filesListFolderContinue({cursor: cursor});
+            hasMore = result.result.has_more;
+            cursor = result.result.cursor;
+            for (entry of result.result.entries) {
+                entriesFullList.push(entry.name);
+            }
+        }
+        return entriesFullList;
+    }
+
+    async loadNamedRecord (recordName) {
+        this.guiController.setLoadFormStatus("Deleting old data, please wait");
+        this.setUpDbx();
+        const namedRecordsDirName = this.getNamedRecordsDN();
+        const loadDirPath = namedRecordsDirName + "/" + recordName;
+        const perfRecordPath = "/"+DropboxStorage.getPerRecordFN();;
+        const currentCatagoryPath = "/"+DropboxStorage.getCurrentCategoryFN();
+        const catagoriesPath = "/"+DropboxStorage.getCategoriesArrayFN();
+        const entries = [{ from_path: loadDirPath+perfRecordPath, to_path: perfRecordPath },
+        { from_path: loadDirPath+currentCatagoryPath, to_path: currentCatagoryPath },
+        { from_path: loadDirPath+catagoriesPath, to_path: catagoriesPath }]
+        for (var pathToDelete of [perfRecordPath,currentCatagoryPath,catagoriesPath]) {
+            if (await this.checkFolderExists(pathToDelete)) {
+                await this.dbx.filesDeleteV2({ path: pathToDelete });
+            }    
+        }
+        this.guiController.setLoadFormStatus("Copying new data, please wait");
+        const filesCopyResult = await this.dbx.filesCopyBatchV2( {entries: entries} )
+        await this.waitUntilCopyFinished(filesCopyResult);
+        window.location.href = "";
+    }
+
+    async waitUntilCopyFinished(filesCopyResult) {
+        const sleep = ms => new Promise(r => setTimeout(r, ms));
+        while(true) {
+            await sleep(1000);
+            const BatchCheckResult = await this.dbx.filesCopyBatchCheckV2(filesCopyResult.result)
+            if(BatchCheckResult.result['.tag'] === "complete" ) {
+                break;
+            }
+        }
+    }
+
+    async saveAs(recordName) {
+        this.guiController.setSaveFormStatus("Saving record, please wait");
+        this.setUpDbx();
+        const namedRecordsDirName = this.getNamedRecordsDN();
+        if (! await this.checkFolderExists(namedRecordsDirName)) {
+            await this.dbx.filesCreateFolderV2({ path: namedRecordsDirName, autorename: false });
+        };
+        const saveDirPath = namedRecordsDirName + "/" + recordName;
+        if (await this.checkFolderExists(saveDirPath)) {
+            this.guiController.setSaveFormStatus("Deleting old data, please wait");
+            await this.dbx.filesDeleteV2({ path: saveDirPath });
+        }
+        await this.dbx.filesCreateFolderV2({ path: saveDirPath, autorename: false });
+        const perfRecordPath = "/"+DropboxStorage.getPerRecordFN();;
+        const currentCatagoryPath = "/"+DropboxStorage.getCurrentCategoryFN();
+        const catagoriesPath = "/"+DropboxStorage.getCategoriesArrayFN();
+        this.guiController.setSaveFormStatus("Copying new data, please wait");
+        const entries = [{ from_path: perfRecordPath, to_path: saveDirPath + perfRecordPath },
+        { from_path: currentCatagoryPath, to_path: saveDirPath + currentCatagoryPath },
+        { from_path: catagoriesPath, to_path: saveDirPath + catagoriesPath }]
+        const filesCopyResult = await this.dbx.filesCopyBatchV2( {entries: entries} )
+        await this.waitUntilCopyFinished(filesCopyResult);
+        window.location.href = "";
     }
 }
 
@@ -857,6 +970,14 @@ class ReactGui {
         this.categoryComponent = categoryComponent;
     }
 
+    setSaveAsComp(saveAsComp) {
+        this.saveAsComp = saveAsComp;
+    }
+
+    setLoadFromComp(loadFromComp) {
+        this.loadFromComp = loadFromComp;
+    }
+
     addTrailCategory(name) {
         this.categoryComponent.setState((state, props) => {
             var newArray = [...state.categoryNamesArray]; //copy array because setState runs twice under <React.StrictMode>
@@ -949,6 +1070,14 @@ class ReactGui {
         this.appComponent.setState({ savingStatusLine: msg });
     }
 
+    setSaveFormStatus(msg) {
+        this.saveAsComp.setState({saveFormStatus: msg});
+    }
+
+    setLoadFormStatus(msg) {
+        this.loadFromComp.setState({loadFormStatus: msg }); 
+    }
+
     notifyCustomStorageLoaded() {
         this.appComponent.setState({ isCustomStorageLoaded: true });
     }
@@ -966,7 +1095,7 @@ class ReactGui {
     }
 
     goToMainScreen() {
-        window.location.hash="/";
+        window.location.hash = "/";
     }
 }
 

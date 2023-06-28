@@ -222,8 +222,87 @@ class App extends React.Component {
           <Route path="/signup" element={<SignUpPage appEngine={this.props.appEngine} />} />
           <Route path="/login" element={<LoginPage appEngine={this.props.appEngine} />} />
           <Route path="/accountOptions" element={<AccountPage appEngine={this.props.appEngine} />} />
+          <Route path="/saveAs" element={<SaveAsPage appEngine={this.props.appEngine} />} />
+          <Route path="/loadFrom" element={<LoadFromPage appEngine={this.props.appEngine} />} />
         </Routes>
       </Router>)
+  }
+}
+
+class LoadFromPage extends React.Component {
+
+  constructor(props) {
+    super(props);
+    this.recordSelectMenu = React.createRef();
+    this.state = { loadFormStatus: "",savedRecordList: [] };
+  }
+
+  async componentDidMount() {
+    var appEngine = this.props.appEngine
+    const savedRecordList = await appEngine.getDropboxStorage().getSavedRecordsList();
+    this.setState((state, props) => {
+      var result = { savedRecordList: savedRecordList };
+      return result;
+    });
+    this.props.appEngine.getGuiController().setLoadFromComp(this);
+  }
+
+  loadRecord = () => {
+    var name = this.recordSelectMenu.current.value;
+    var appEngine = this.props.appEngine;
+    appEngine.getDropboxStorage().loadNamedRecord(name);
+  }
+
+  render() {
+    var options = [];
+    for (var saveName of this.state.savedRecordList) {
+      options.push(<option key={saveName} value={saveName}>{saveName}</option>);
+    }
+    return (<>
+      <p>Load saved record:  </p>
+      <div id="loadItems">
+      <form>
+        <select name="savedRecordSelect" id="savedRecordSelect"
+          size={this.state.savedRecordList.length} ref={this.recordSelectMenu}>
+          {options}
+        </select>
+      </form>
+      <input onClick={this.loadRecord} type="submit" value="load" />
+      <p>{this.state.loadFormStatus}</p>
+      <Link to="/">Back to main screen</Link></div>
+    </>
+    )
+  }
+}
+
+
+class SaveAsPage extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { saveFormStatus: ""};
+  }
+
+  async componentDidMount() {
+    this.props.appEngine.getGuiController().setSaveAsComp(this);
+  }
+
+  save = (event) => {
+    event.preventDefault();
+    var appEngine = this.props.appEngine;
+    appEngine.getDropboxStorage().saveAs(this.currentSaveName);
+  }
+
+  render() {
+    return (<>
+      <form onSubmit={this.save}>
+        <label htmlFor="fname">Save As </label>
+        <input type="text" id="saveAsInput" name="saveAsInput" onChange={(event) => { this.currentSaveName = event.target.value }} />
+        <input type="submit" value="save" />
+      </form>
+      <p>{this.state.saveFormStatus}</p>
+      <Link to="/">Back to main screen</Link>
+    </>
+    )
   }
 }
 
@@ -293,6 +372,7 @@ class TrailCategoryWidget extends React.Component {
   }
 
   setSelectedCategory(name) {
+    if (this.categorySelectMenu.current === null) return;
     var categorySelectMenu = this.categorySelectMenu.current
     var options = categorySelectMenu.options;
     for (var i = 0; i < categorySelectMenu.length; ++i) {
@@ -400,9 +480,11 @@ class PracticeScreen extends React.Component {
   constructor(props) {
     super(props);
     console.log("Starting digit span practice app");
+    const appEngine = this.props.appEngine;
     this.state = {
       numToRecall: '12345', isInputMode: true, savingStatusLine: "",
-      isUsingCustomStorage: this.props.appEngine.isUsingCustomStorage()
+      isUsingCustomStorage: appEngine.isUsingCustomStorage(),
+      isUsingDropboxStorage: appEngine.isUsingDropboxStorage()
     };
     this.startButton = React.createRef();
     this.saveSettingButton = React.createRef();
@@ -425,8 +507,8 @@ class PracticeScreen extends React.Component {
     this.props.appEngine.getGuiController().setAppComponent(this);
     await this.props.appEngine.onPageLoad();
     this.forceUpdate();
-    this.startButton.current.disabled = false;
     this.setIsPWA();
+    if (this.startButton.current) this.startButton.current.disabled = false;
   }
 
   setIsPWA() {
@@ -481,8 +563,9 @@ class PracticeScreen extends React.Component {
     if (!appEngine.isUsingCustomStorage()) {
       this.setState({ isUsingCustomStorage: false });
     }
-    await appEngine.saveEverything();
 
+    this.setState({ isUsingDropboxStorage: appEngine.isUsingDropboxStorage() });
+    await appEngine.saveEverything();
   }
 
   handleSwitchToCustomStorage = async () => {
@@ -575,6 +658,14 @@ class PracticeScreen extends React.Component {
     }
   }
 
+  gotoSaveAs = async () => {
+    window.location.href = "#/saveAs"
+  }
+
+  gotoLoadFrom = async () => {
+    window.location.href = "#/loadFrom"
+  }
+
   render() {
     var mainDisplay;
     var appEngine = this.props.appEngine;
@@ -582,6 +673,13 @@ class PracticeScreen extends React.Component {
     if (this.state.isUsingCustomStorage) {
       custonStorageControls = <CustomStorageControls customStorage={appEngine.getCustomStorage()}
         isCustomStorageLoaded={this.state.isCustomStorageLoaded} />
+    }
+    var dropboxControls = "";
+    if (this.state.isUsingDropboxStorage) {
+      dropboxControls = <div className="CustomStorageControls">
+        <button id="saveAs" type="button" onClick={this.gotoSaveAs} >Save Record As</button>
+        <button id="loadFrom" type="button" onClick={this.gotoLoadFrom} >Load Record From</button>
+      </div>
     }
     if (this.state.isInputMode) {
       mainDisplay = <InputForm nameSuffix="_Digits" focusOnStart onSubmit={this.checkAnswer}
@@ -621,15 +719,16 @@ class PracticeScreen extends React.Component {
             </select>
           </form>
           {custonStorageControls}
+          {dropboxControls}
           <div id="dropboxLine">
             <button id="setUpDropbox" type="button" onClick={this.setUpDropbox} >Set up Dropbox Storage</button>
             <div>{this.state.savingStatusLine}</div>
           </div>
+
           <div id="errorConsole">
             {errorElements}
           </div>
           <TrailCategoryWidget appEngine={appEngine} />
-
           <Link to="/about">About this task</Link>
         </div>
         <div id="scoreChart">

@@ -1,5 +1,5 @@
 /*TODO: using px instead of cm is probably a better idea, because css pixels are relative to the 
-type and size of the screen*/
+type and size of the screen, see: https://www.w3.org/Style/Examples/007/units.en.html*/
 
 #mainTerminal {
     float: left;
@@ -18,6 +18,11 @@ type and size of the screen*/
 
 #setUpDropbox {
     margin-right: 0.5cm;
+    font-size: 14px;
+}
+
+#saveAs {
+    margin-right: 9px;
     font-size: 14px;
 }
 
@@ -53,4 +58,17 @@ type and size of the screen*/
     margin-bottom: 0 ;
     margin-left: 1ex;
     color: green;
+}
+
+#loadItems {
+    display: flex;
+    flex-direction: column;
+}
+
+#loadItems > input {
+    width: 60px;
+}
+
+#loadItems > * {
+    margin-bottom: 10px;
 }
