@@ -234,7 +234,7 @@ class LoadFromPage extends React.Component {
   constructor(props) {
     super(props);
     this.recordSelectMenu = React.createRef();
-    this.state = { loadFormStatus: "",savedRecordList: [] };
+    this.state = { loadFormStatus: "", savedRecordList: [] };
   }
 
   async componentDidMount() {
@@ -275,14 +275,21 @@ class LoadFromPage extends React.Component {
   }
 }
 
-
 class SaveAsPage extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { saveFormStatus: ""};
+    this.recordSelectMenu = React.createRef();
+    this.textInput = React.createRef();
+    this.state = { saveFormStatus: "", savedRecordList: [] };
   }
 
   async componentDidMount() {
+    var appEngine = this.props.appEngine
+    const savedRecordList = await appEngine.getDropboxStorage().getSavedRecordsList();
+    this.setState((state, props) => {
+      var result = { savedRecordList: savedRecordList };
+      return result;
+    });
     this.props.appEngine.getGuiController().setSaveAsComp(this);
   }
 
@@ -292,13 +299,31 @@ class SaveAsPage extends React.Component {
     appEngine.getDropboxStorage().saveAs(this.currentSaveName);
   }
 
+  savedRecordSelected = () => {
+    var name = this.recordSelectMenu.current.value;
+    this.textInput.current.value = name;
+    this.currentSaveName = name;
+  }
+
   render() {
+    var options = [];
+    for (var saveName of this.state.savedRecordList) {
+      options.push(<option key={saveName} value={saveName}>{saveName}</option>);
+    }
     return (<>
       <form onSubmit={this.save}>
         <label htmlFor="fname">Save As </label>
-        <input type="text" id="saveAsInput" name="saveAsInput" onChange={(event) => { this.currentSaveName = event.target.value }} />
+        <input type="text" id="saveAsInput" name="saveAsInput" 
+        onChange={(event) => { this.currentSaveName = event.target.value }} ref={this.textInput} />
         <input type="submit" value="save" />
       </form>
+      <form>
+        <select name="savedAsRecordsSelect" id="savedAsRecordsSelect" onClick={this.savedRecordSelected}
+          size={this.state.savedRecordList.length} ref={this.recordSelectMenu}>
+          {options}
+        </select>
+      </form>
+
       <p>{this.state.saveFormStatus}</p>
       <Link to="/">Back to main screen</Link>
     </>

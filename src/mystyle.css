@@ -72,3 +72,7 @@ type and size of the screen, see: https://www.w3.org/Style/Examples/007/units.en
 #loadItems > * {
     margin-bottom: 10px;
 }
+
+#savedAsRecordsSelect {
+    margin-top: 10px;
+}
