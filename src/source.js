@@ -703,6 +703,21 @@ class DropboxStorage {
         await this.waitUntilCopyFinished(filesCopyResult);
         window.location.href = "";
     }
+
+    async deleteRecord (recordName) {
+        this.setUpDbx();
+        const namedRecordsDirName = this.getNamedRecordsDN();
+        const saveDirPath = namedRecordsDirName + "/" + recordName;
+        if (await this.checkFolderExists(saveDirPath)) {
+            this.guiController.setSaveFormStatus("Deleting old data, please wait");
+            await this.dbx.filesDeleteV2({ path: saveDirPath });
+            this.guiController.setSaveFormStatus("Done deleting record");
+            return true;    
+        } else {
+            this.guiController.setSaveFormStatus("Didn't find any data to delete, aborting");
+            return false;
+        }
+    }
 }
 
 class CustomStorage {

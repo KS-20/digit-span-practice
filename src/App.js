@@ -261,15 +261,15 @@ class LoadFromPage extends React.Component {
     return (<>
       <p>Load saved record:  </p>
       <div id="loadItems">
-      <form>
-        <select name="savedRecordSelect" id="savedRecordSelect"
-          size={this.state.savedRecordList.length} ref={this.recordSelectMenu}>
-          {options}
-        </select>
-      </form>
-      <input onClick={this.loadRecord} type="submit" value="load" />
-      <p>{this.state.loadFormStatus}</p>
-      <Link to="/">Back to main screen</Link></div>
+        <form>
+          <select name="savedRecordSelect" id="savedRecordSelect"
+            size={this.state.savedRecordList.length} ref={this.recordSelectMenu}>
+            {options}
+          </select>
+        </form>
+        <input onClick={this.loadRecord} type="submit" value="load" />
+        <p>{this.state.loadFormStatus}</p>
+        <Link to="/">Back to main screen</Link></div>
     </>
     )
   }
@@ -305,6 +305,18 @@ class SaveAsPage extends React.Component {
     this.currentSaveName = name;
   }
 
+  delete = async (event) => {
+    event.preventDefault();
+    var appEngine = this.props.appEngine;
+    const wasDeleted = await appEngine.getDropboxStorage().deleteRecord(this.currentSaveName);
+    if (wasDeleted) {
+      this.setState((state) => {
+        const newArray = state.savedRecordList.filter(x => x !== this.currentSaveName);
+        return { savedRecordList: newArray };
+      });
+    }
+  }
+
   render() {
     var options = [];
     for (var saveName of this.state.savedRecordList) {
@@ -313,8 +325,8 @@ class SaveAsPage extends React.Component {
     return (<>
       <form onSubmit={this.save}>
         <label htmlFor="fname">Save As </label>
-        <input type="text" id="saveAsInput" name="saveAsInput" 
-        onChange={(event) => { this.currentSaveName = event.target.value }} ref={this.textInput} />
+        <input type="text" id="saveAsInput" name="saveAsInput"
+          onChange={(event) => { this.currentSaveName = event.target.value }} ref={this.textInput} />
         <input type="submit" value="save" />
       </form>
       <form>
@@ -323,6 +335,7 @@ class SaveAsPage extends React.Component {
           {options}
         </select>
       </form>
+      <input onClick={this.delete} type="submit" value="delete save" />
 
       <p>{this.state.saveFormStatus}</p>
       <Link to="/">Back to main screen</Link>
