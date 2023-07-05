@@ -361,6 +361,10 @@ class TrailCategoryWidget extends React.Component {
     this.categoryToAdd = "";
   }
 
+  setCategories(categoriesArray) {
+    this.setState({ categoryNamesArray: categoriesArray });
+  }
+
   async componentDidMount() {
     this.props.appEngine.getGuiController().setCategoryComponent(this);
   }
@@ -432,6 +436,16 @@ class TrailCategoryWidget extends React.Component {
       categorySelectMenu.selectedIndex = categorySelectMenu.length - 1;
       this.categoryWasAdded = false;
     }
+    
+    const requestedCurrentCtg = this.requestedCurrentCtg;
+    if(requestedCurrentCtg) {
+      this.setSelectedCategory(requestedCurrentCtg)
+      delete this.requestedCurrentCtg;
+    }
+  }
+
+  setRequestedCurrentCtg (requestedCurrentCtg) {
+    this.requestedCurrentCtg = requestedCurrentCtg;
   }
 
   render() {
@@ -529,6 +543,7 @@ class PracticeScreen extends React.Component {
     this.storageTypeMenu = React.createRef();
 
     this.setUpDropbox = this.setUpDropbox.bind(this);
+    this.trailCategoryWidget = React.createRef()
   }
 
   focusStartButton = () => {
@@ -542,8 +557,11 @@ class PracticeScreen extends React.Component {
 
   async componentDidMount() {
     this.startButton.current.disabled = true;
-    this.props.appEngine.getGuiController().setAppComponent(this);
-    await this.props.appEngine.onPageLoad();
+    var appEngine = this.props.appEngine;
+    appEngine.getGuiController().setAppComponent(this);
+    await appEngine.onPageLoad();
+    this.trailCategoryWidget.current.setCategories(appEngine.getTrailCategories());
+    this.trailCategoryWidget.current.setRequestedCurrentCtg(appEngine.getCurrentCategory());
     this.forceUpdate();
     this.setIsPWA();
     if (this.startButton.current) this.startButton.current.disabled = false;
@@ -766,7 +784,7 @@ class PracticeScreen extends React.Component {
           <div id="errorConsole">
             {errorElements}
           </div>
-          <TrailCategoryWidget appEngine={appEngine} />
+          <TrailCategoryWidget appEngine={appEngine} ref={this.trailCategoryWidget} />
           <Link to="/about">About this task</Link>
         </div>
         <div id="scoreChart">

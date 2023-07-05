@@ -221,9 +221,6 @@ class AppEngine {
 
     async loadCategoryData() {
         this.trailCategoryArray = await this.longTermStorage.loadCategoryArray();
-        for (const trailCategory of this.trailCategoryArray) {
-            this.guiController.addTrailCategory(trailCategory);
-        }
         this.currentCategory = await this.longTermStorage.loadCurrentCategory();
         this.guiController.setSelectedCategory(this.currentCategory);
     }
