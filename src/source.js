@@ -435,7 +435,7 @@ class DropboxStorage {
         var fileContent = JSON.stringify(categoriesArray);
         var args = {
             contents: fileContent,
-            path: "/"+DropboxStorage.getCategoriesArrayFN(),
+            path: "/" + DropboxStorage.getCategoriesArrayFN(),
             mode: { ".tag": "overwrite" },
             autorename: true,
             mute: true,
@@ -447,7 +447,7 @@ class DropboxStorage {
         this.guiController.setSavingStatusLine("Uploaded data to Dropbox");
     }
 
-    static getCurrentCategoryFN () {
+    static getCurrentCategoryFN() {
         return "digit_span_current_category.json";
     }
 
@@ -457,7 +457,7 @@ class DropboxStorage {
         var fileContent = JSON.stringify(currentCategory);
         var args = {
             contents: fileContent,
-            path: "/"+DropboxStorage.getCurrentCategoryFN(),
+            path: "/" + DropboxStorage.getCurrentCategoryFN(),
             mode: { ".tag": "overwrite" },
             autorename: true,
             mute: true,
@@ -593,7 +593,7 @@ class DropboxStorage {
         var fileContent = JSON.stringify(performanceRecord);
         var args = {
             contents: fileContent,
-            path: "/"+DropboxStorage.getPerRecordFN(),
+            path: "/" + DropboxStorage.getPerRecordFN(),
             mode: { ".tag": "overwrite" },
             autorename: true,
             mute: true,
@@ -617,14 +617,14 @@ class DropboxStorage {
         }
     }
 
-    getNamedRecordsDN () {
+    getNamedRecordsDN() {
         return "/namedRecords";
     }
 
-    async getSavedRecordsList () {
+    async getSavedRecordsList() {
         this.setUpDbx();
         const namedRecordsDirName = this.getNamedRecordsDN();
-        const arg = {path: namedRecordsDirName};
+        const arg = { path: namedRecordsDirName };
         const result = await this.dbx.filesListFolder(arg);
         var entriesFullList = [];
         for (var entry of result.result.entries) {
@@ -632,8 +632,8 @@ class DropboxStorage {
         }
         var hasMore = result.result.has_more;
         var cursor = result.result.cursor;
-        while(hasMore) {
-            const result = await this.dbx.filesListFolderContinue({cursor: cursor});
+        while (hasMore) {
+            const result = await this.dbx.filesListFolderContinue({ cursor: cursor });
             hasMore = result.result.has_more;
             cursor = result.result.cursor;
             for (entry of result.result.entries) {
@@ -643,34 +643,34 @@ class DropboxStorage {
         return entriesFullList;
     }
 
-    async loadNamedRecord (recordName) {
+    async loadNamedRecord(recordName) {
         this.guiController.setLoadFormStatus("Deleting old data, please wait");
         this.setUpDbx();
         const namedRecordsDirName = this.getNamedRecordsDN();
         const loadDirPath = namedRecordsDirName + "/" + recordName;
-        const perfRecordPath = "/"+DropboxStorage.getPerRecordFN();;
-        const currentCatagoryPath = "/"+DropboxStorage.getCurrentCategoryFN();
-        const catagoriesPath = "/"+DropboxStorage.getCategoriesArrayFN();
-        const entries = [{ from_path: loadDirPath+perfRecordPath, to_path: perfRecordPath },
-        { from_path: loadDirPath+currentCatagoryPath, to_path: currentCatagoryPath },
-        { from_path: loadDirPath+catagoriesPath, to_path: catagoriesPath }]
-        for (var pathToDelete of [perfRecordPath,currentCatagoryPath,catagoriesPath]) {
+        const perfRecordPath = "/" + DropboxStorage.getPerRecordFN();;
+        const currentCatagoryPath = "/" + DropboxStorage.getCurrentCategoryFN();
+        const catagoriesPath = "/" + DropboxStorage.getCategoriesArrayFN();
+        const entries = [{ from_path: loadDirPath + perfRecordPath, to_path: perfRecordPath },
+        { from_path: loadDirPath + currentCatagoryPath, to_path: currentCatagoryPath },
+        { from_path: loadDirPath + catagoriesPath, to_path: catagoriesPath }]
+        for (var pathToDelete of [perfRecordPath, currentCatagoryPath, catagoriesPath]) {
             if (await this.checkFolderExists(pathToDelete)) {
                 await this.dbx.filesDeleteV2({ path: pathToDelete });
-            }    
+            }
         }
         this.guiController.setLoadFormStatus("Copying new data, please wait");
-        const filesCopyResult = await this.dbx.filesCopyBatchV2( {entries: entries} )
+        const filesCopyResult = await this.dbx.filesCopyBatchV2({ entries: entries })
         await this.waitUntilCopyFinished(filesCopyResult);
         window.location.href = "";
     }
 
     async waitUntilCopyFinished(filesCopyResult) {
         const sleep = ms => new Promise(r => setTimeout(r, ms));
-        while(true) {
+        while (true) {
             await sleep(1000);
             const BatchCheckResult = await this.dbx.filesCopyBatchCheckV2(filesCopyResult.result)
-            if(BatchCheckResult.result['.tag'] === "complete" ) {
+            if (BatchCheckResult.result['.tag'] === "complete") {
                 break;
             }
         }
@@ -689,19 +689,19 @@ class DropboxStorage {
             await this.dbx.filesDeleteV2({ path: saveDirPath });
         }
         await this.dbx.filesCreateFolderV2({ path: saveDirPath, autorename: false });
-        const perfRecordPath = "/"+DropboxStorage.getPerRecordFN();;
-        const currentCatagoryPath = "/"+DropboxStorage.getCurrentCategoryFN();
-        const catagoriesPath = "/"+DropboxStorage.getCategoriesArrayFN();
+        const perfRecordPath = "/" + DropboxStorage.getPerRecordFN();;
+        const currentCatagoryPath = "/" + DropboxStorage.getCurrentCategoryFN();
+        const catagoriesPath = "/" + DropboxStorage.getCategoriesArrayFN();
         this.guiController.setSaveFormStatus("Copying new data, please wait");
         const entries = [{ from_path: perfRecordPath, to_path: saveDirPath + perfRecordPath },
         { from_path: currentCatagoryPath, to_path: saveDirPath + currentCatagoryPath },
         { from_path: catagoriesPath, to_path: saveDirPath + catagoriesPath }]
-        const filesCopyResult = await this.dbx.filesCopyBatchV2( {entries: entries} )
+        const filesCopyResult = await this.dbx.filesCopyBatchV2({ entries: entries })
         await this.waitUntilCopyFinished(filesCopyResult);
         window.location.href = "";
     }
 
-    async deleteRecord (recordName) {
+    async deleteRecord(recordName) {
         this.setUpDbx();
         const namedRecordsDirName = this.getNamedRecordsDN();
         const saveDirPath = namedRecordsDirName + "/" + recordName;
@@ -709,7 +709,7 @@ class DropboxStorage {
             this.guiController.setSaveFormStatus("Deleting old data, please wait");
             await this.dbx.filesDeleteV2({ path: saveDirPath });
             this.guiController.setSaveFormStatus("Done deleting record");
-            return true;    
+            return true;
         } else {
             this.guiController.setSaveFormStatus("Didn't find any data to delete, aborting");
             return false;
@@ -773,7 +773,12 @@ class CustomStorage {
     }
 
     getServerUrl() {
-        return 'http://localhost:6001';
+        const serverUrl = process.env.SERVER_URL;
+        if (serverUrl) {
+            return serverUrl;
+        } else {
+            return 'http://localhost:6001';
+        }
     }
     getAccessToken() {
         return window.localStorage.getItem(CustomStorage.getAccessTokenKey());
@@ -1083,11 +1088,11 @@ class ReactGui {
     }
 
     setSaveFormStatus(msg) {
-        this.saveAsComp.setState({saveFormStatus: msg});
+        this.saveAsComp.setState({ saveFormStatus: msg });
     }
 
     setLoadFormStatus(msg) {
-        this.loadFromComp.setState({loadFormStatus: msg }); 
+        this.loadFromComp.setState({ loadFormStatus: msg });
     }
 
     notifyCustomStorageLoaded() {
