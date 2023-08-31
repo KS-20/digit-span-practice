@@ -172,7 +172,7 @@ class ScoreChart extends React.Component {
         </div>
         <form>
         <label htmlFor="displaySelect">Show in graph:  </label>
-        <select onInput={this.changeGraphDisplay} name="displaySelect" id="displaySelect" ref={this.displaySelectMenu}>
+        <select className="form-select" onInput={this.changeGraphDisplay} name="displaySelect" id="displaySelect" ref={this.displaySelectMenu}>
           <option value={names.averageScore}>{names.averageScore}</option>
           <option value="Success rate">Success rate</option>
         </select>

@@ -77,3 +77,27 @@ type and size of the screen, see: https://www.w3.org/Style/Examples/007/units.en
     margin-top: 10px;
     margin-bottom: 10px;
 }
+
+#startPractice {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#saveSettings {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+label {
+    display: inline;
+}
+
+.form-select {
+    display: inline;
+    width: auto;
+}
+
+.form-control {
+    display: inline;
+    width: auto;
+}

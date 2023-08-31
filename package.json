@@ -5,11 +5,13 @@
   "homepage": "https://KS-20.github.io/digit-span-practice",
   "type": "module",
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^14.0.0",
     "@testing-library/user-event": "^14.4.3",
     "apexcharts": "^3.37.1",
     "bcrypt": "^5.1.0",
+    "bootstrap": "^5.3.1",
     "buffer": "^6.0.3",
     "crypto-browserify": "^3.12.0",
     "dotenv": "^16.0.3",
@@ -65,6 +67,7 @@
   "devDependencies": {
     "process": "^0.11.10",
     "react-app-rewired": "^2.2.1",
+    "sass": "^1.66.1",
     "stylelint": "^15.3.0",
     "stylelint-config-standard": "^31.0.0"
   }

@@ -1,6 +1,5 @@
 import React from 'react';
 import ScoreChart from './scoreChart.js'
-import './mystyle.css'
 import { names } from './repeatedStrings.js'
 import {
   HashRouter as Router, //Need a hash router so it would work with github pages, see: https://www.freecodecamp.org/news/deploy-a-react-app-to-github-pages/
@@ -10,7 +9,8 @@ import {
 } from "react-router-dom";
 import { serverConnectErrAlert } from './source.js'
 import swal from 'sweetalert'
-
+import "./js/loadBootstrap.js";
+import './mystyle.css'
 
 class InputForm extends React.Component {
   constructor(props) {
@@ -37,7 +37,7 @@ class InputForm extends React.Component {
   render() {
     return (
       <form name={"form" + this.props.nameSuffix} onSubmit={this.onSubmit} >
-        <input name={"input" + this.props.nameSuffix} type={this.props.inputType}
+        <input class="form-control" name={"input" + this.props.nameSuffix} type={this.props.inputType}
           onChange={this.handleChange} defaultValue={this.props.defaultValue}
           ref={(input) => { this.nameInput = input; }} />
       </form>
@@ -204,7 +204,7 @@ class AccountPage extends React.Component {
   render() {
     return (
       <>
-        <button id="deleteAccount" type="button" onClick={this.deleteAccount} >delete account</button>
+        <button className="btn btn-primary" id="deleteAccount" type="button" onClick={this.deleteAccount} >delete account</button>
       </>
     )
   }
@@ -262,12 +262,12 @@ class LoadFromPage extends React.Component {
       <p>Load saved record:  </p>
       <div id="loadItems">
         <form>
-          <select name="savedRecordSelect" id="savedRecordSelect"
+          <select className="form-select" name="savedRecordSelect" id="savedRecordSelect"
             size={this.state.savedRecordList.length} ref={this.recordSelectMenu}>
             {options}
           </select>
         </form>
-        <input onClick={this.loadRecord} type="submit" value="load" />
+        <input className="btn btn-primary" onClick={this.loadRecord} type="submit" value="load" />
         <p>{this.state.loadFormStatus}</p>
         <Link to="/">Back to main screen</Link></div>
     </>
@@ -327,15 +327,15 @@ class SaveAsPage extends React.Component {
         <label htmlFor="fname">Save As </label>
         <input type="text" id="saveAsInput" name="saveAsInput"
           onChange={(event) => { this.currentSaveName = event.target.value }} ref={this.textInput} />
-        <input type="submit" value="save" />
+        <input className="btn btn-primary" type="submit" value="save" />
       </form>
       <form>
-        <select name="savedAsRecordsSelect" id="savedAsRecordsSelect" onClick={this.savedRecordSelected}
+        <select className="form-select" name="savedAsRecordsSelect" id="savedAsRecordsSelect" onClick={this.savedRecordSelected}
           size={this.state.savedRecordList.length} ref={this.recordSelectMenu}>
           {options}
         </select>
       </form>
-      <input onClick={this.delete} type="submit" value="delete save" />
+      <input className="btn btn-primary" onClick={this.delete} type="submit" value="delete save" />
 
       <p>{this.state.saveFormStatus}</p>
       <Link to="/">Back to main screen</Link>
@@ -436,15 +436,15 @@ class TrailCategoryWidget extends React.Component {
       categorySelectMenu.selectedIndex = categorySelectMenu.length - 1;
       this.categoryWasAdded = false;
     }
-    
+
     const requestedCurrentCtg = this.requestedCurrentCtg;
-    if(requestedCurrentCtg) {
+    if (requestedCurrentCtg) {
       this.setSelectedCategory(requestedCurrentCtg)
       delete this.requestedCurrentCtg;
     }
   }
 
-  setRequestedCurrentCtg (requestedCurrentCtg) {
+  setRequestedCurrentCtg(requestedCurrentCtg) {
     this.requestedCurrentCtg = requestedCurrentCtg;
   }
 
@@ -456,23 +456,22 @@ class TrailCategoryWidget extends React.Component {
     return (<>
       <form>
         <label htmlFor="categorySelect">Switch to category:  </label>
-        <select onInput={this.switchToCategory} name="categorySelect" id="categorySelect" ref={this.categorySelectMenu}>
+        <select className="form-select" onInput={this.switchToCategory} name="categorySelect" id="categorySelect" ref={this.categorySelectMenu}>
           <option value="None">None</option>
           {options}
         </select>
       </form>
       <form onSubmit={this.addCategory}>
         <label htmlFor="fname">Add trail category: </label>
-        <input type="text" id="fname" name="fname" onChange={(event) => { this.categoryToAdd = event.target.value }} />
-        <input type="submit" value="Add" />
+        <input class="form-control" type="text" id="fname" name="fname" onChange={(event) => { this.categoryToAdd = event.target.value }} />
+        <input className="btn btn-primary" type="submit" value="Add" />
       </form>
-
       <form>
         <label htmlFor="categoryRemove">Remove category:   </label>
-        <select name="categoryRemove" id="categoryRemove" ref={this.categoryRemoveMenu}>
+        <select className="form-select" name="categoryRemove" id="categoryRemove" ref={this.categoryRemoveMenu}>
           {options}
         </select>
-        <input onClick={this.removeCategory} type="submit" value="remove" />
+        <input className="btn btn-primary" onClick={this.removeCategory} type="submit" value="remove" />
       </form>
     </>
     )
@@ -510,14 +509,14 @@ class CustomStorageControls extends React.Component {
       }
       elementToRender = <div className="CustomStorageControls">
         <label>logged in as: {customStorage.getUserName()} </label>
-        <button id="logOut" type="button" onClick={this.logout} >Log out</button>
-        <button id="accountOptions" type="button" onClick={this.accountOptions} >Account Options</button>
+        <button className="btn btn-primary" id="logOut" type="button" onClick={this.logout} >Log out</button>
+        <button className="btn btn-primary" id="accountOptions" type="button" onClick={this.accountOptions} >Account Options</button>
         {displayMsg}
       </div>
     } else {
       elementToRender = <div className="CustomStorageControls">
-        <button id="signIn" type="button" onClick={this.login} >Log In</button>
-        <button id="signUp" type="button" onClick={this.signUp} >Sign Up</button>
+        <button className="btn btn-primary" id="signIn" type="button" onClick={this.login} >Log In</button>
+        <button className="btn btn-primary" id="signUp" type="button" onClick={this.signUp} >Sign Up</button>
       </div>;
     }
     return (
@@ -733,8 +732,8 @@ class PracticeScreen extends React.Component {
     var dropboxControls = "";
     if (this.state.isUsingDropboxStorage) {
       dropboxControls = <div className="CustomStorageControls">
-        <button id="saveAs" type="button" onClick={this.gotoSaveAs} >Save Record As</button>
-        <button id="loadFrom" type="button" onClick={this.gotoLoadFrom} >Load Record From</button>
+        <button className="btn btn-primary" id="saveAs" type="button" onClick={this.gotoSaveAs} >Save Record As</button>
+        <button className="btn btn-primary" id="loadFrom" type="button" onClick={this.gotoLoadFrom} >Load Record From</button>
       </div>
     }
     if (this.state.isInputMode) {
@@ -756,7 +755,7 @@ class PracticeScreen extends React.Component {
       <>
         <div id="mainTerminal">
           {mainDisplay}
-          <button id="startPractice" type="button" autoFocus onClick={() => appEngine.startPracticeSet()}
+          <button className="btn btn-primary" id="startPractice" type="button" autoFocus onClick={() => appEngine.startPracticeSet()}
             ref={this.startButton}>
             start practice </button>
           <p>Length of number:</p>
@@ -765,10 +764,10 @@ class PracticeScreen extends React.Component {
           <p>Number of reps:</p>
           <InputForm nameSuffix="_RepCount" onChange={this.setNumOfRepsField} inputType="number"
             defaultValue={this.state.defaultRepNum} />
-          <button id="saveSettings" type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
+          <button className="btn btn-primary" id="saveSettings" type="button" onClick={this.saveSettings} ref={this.saveSettingButton}>Save Settings</button>
           <form>
             <label htmlFor="dataStorageSelector">Save and Load to  </label>
-            <select onInput={this.setStorageTech} name="dataStorageSelector" id="dataStorageSelector" ref={this.storageTypeMenu}>
+            <select className="form-select" onInput={this.setStorageTech} name="dataStorageSelector" id="dataStorageSelector" ref={this.storageTypeMenu}>
               <option value={names.dropbox}>{names.dropbox}</option>
               <option value={names.browserStorage}>{names.browserStorage}</option>
               <option value={names.digitSpanPracticeServer}>{names.digitSpanPracticeServer}</option>
@@ -777,7 +776,7 @@ class PracticeScreen extends React.Component {
           {custonStorageControls}
           {dropboxControls}
           <div id="dropboxLine">
-            <button id="setUpDropbox" type="button" onClick={this.setUpDropbox} >Set up Dropbox Storage</button>
+            <button className="btn btn-primary" id="setUpDropbox" type="button" onClick={this.setUpDropbox} >Set up Dropbox Storage</button>
             <div>{this.state.savingStatusLine}</div>
           </div>
 
