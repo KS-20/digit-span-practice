@@ -101,3 +101,7 @@ label {
     display: inline;
     width: auto;
 }
+
+#saveAsInput {
+    margin-right: 10px;
+}
