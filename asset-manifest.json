@@ -1,16 +1,16 @@
 {
   "files": {
-    "main.css": "/digit-span-practice/static/css/main.cf9e591a.css",
+    "main.css": "/digit-span-practice/static/css/main.bf311123.css",
     "main.js": "/digit-span-practice/static/js/main.e95f9f09.js",
     "static/js/496.b1e0fb46.chunk.js": "/digit-span-practice/static/js/496.b1e0fb46.chunk.js",
     "service-worker.js": "/digit-span-practice/service-worker.js",
     "index.html": "/digit-span-practice/index.html",
-    "main.cf9e591a.css.map": "/digit-span-practice/static/css/main.cf9e591a.css.map",
+    "main.bf311123.css.map": "/digit-span-practice/static/css/main.bf311123.css.map",
     "main.e95f9f09.js.map": "/digit-span-practice/static/js/main.e95f9f09.js.map",
     "496.b1e0fb46.chunk.js.map": "/digit-span-practice/static/js/496.b1e0fb46.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.cf9e591a.css",
+    "static/css/main.bf311123.css",
     "static/js/main.e95f9f09.js"
   ]
 }
