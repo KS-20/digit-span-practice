@@ -1,5 +1,5 @@
 import React from 'react';
-import ScoreChart from './scoreChart.js'
+import ScoreChart from './scoreChart.jsx'
 import { names } from './repeatedStrings.js'
 import {
   HashRouter as Router, //Need a hash router so it would work with github pages, see: https://www.freecodecamp.org/news/deploy-a-react-app-to-github-pages/
@@ -37,7 +37,7 @@ class InputForm extends React.Component {
   render() {
     return (
       <form name={"form" + this.props.nameSuffix} onSubmit={this.onSubmit} >
-        <input class="form-control" name={"input" + this.props.nameSuffix} type={this.props.inputType}
+        <input className="form-control" name={"input" + this.props.nameSuffix} type={this.props.inputType}
           onChange={this.handleChange} defaultValue={this.props.defaultValue}
           ref={(input) => { this.nameInput = input; }} />
       </form>
@@ -463,7 +463,7 @@ class TrailCategoryWidget extends React.Component {
       </form>
       <form onSubmit={this.addCategory}>
         <label htmlFor="fname">Add trail category: </label>
-        <input class="form-control" type="text" id="fname" name="fname" onChange={(event) => { this.categoryToAdd = event.target.value }} />
+        <input className="form-control" type="text" id="fname" name="fname" onChange={(event) => { this.categoryToAdd = event.target.value }} />
         <input className="btn btn-primary" type="submit" value="Add" />
       </form>
       <form>

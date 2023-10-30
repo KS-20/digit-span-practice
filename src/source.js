@@ -773,7 +773,7 @@ class CustomStorage {
     }
 
     getServerUrl() {
-        const serverUrl = process.env.SERVER_URL;
+        const serverUrl = import.meta.env.VITE_SERVER_URL;
         if (serverUrl) {
             return serverUrl;
         } else {
