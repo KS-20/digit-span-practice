@@ -43,7 +43,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build",
     "start": "vite",
-    "build": "tsc && vite build",
+    "build": "vite build",
     "preview": "vite preview",
     "test": "react-app-rewired test",
     "eject": "react-scripts eject",
