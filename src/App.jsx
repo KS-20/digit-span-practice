@@ -136,7 +136,7 @@ class SignUpPage extends React.Component {
           <p>Password</p>
           <InputForm nameSuffix="_passwordForSignUp" onChange={this.setPassword}
             inputType="password" />
-          <input id="submitSignUp" type="submit" value="Sign up" onClick={this.tryToSignUp} />
+          <input id="submitSignUp" className="btn btn-primary" type="submit" value="Sign up" onClick={this.tryToSignUp} />
 
           <Link to="/">Back to main screen</Link>
         </div>
@@ -185,7 +185,7 @@ class LoginPage extends React.Component {
           <p>Password</p>
           <InputForm nameSuffix="_passwordForLogin" onChange={this.setPassword}
             inputType="password" />
-          <input id="logIn" type="submit" value="log in" onClick={this.tryTologin} />
+          <input id="logIn" className="btn btn-primary" type="submit" value="log in" onClick={this.tryTologin} />
 
           <Link to="/">Back to main screen</Link>
         </div>
