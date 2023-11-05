@@ -1,6 +1,6 @@
 # digit-span-practice
 
-# Setting up a development environment
+## Setting up a development environment
 
 Checkout the code:
 
@@ -25,3 +25,7 @@ To run custom storage server , make sure mysql is running , set the needed envir
 to kill it:
 
 >pm2 kill
+
+## Deploying to github pages
+
+On github: Actions -> Deploy static content to Pages -> Run workflow
