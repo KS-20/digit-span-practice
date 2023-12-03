@@ -1,7 +1,7 @@
 import React from "react";
-import ReactApexChartModule from "react-apexcharts";
 import { names } from './repeatedStrings.js'
-let ReactApexChart = ReactApexChartModule.default; // need this line since adding "type": "module" to package.json, i don't know why
+import ReactApexChart from "react-apexcharts";
+
 
 class ScoreChart extends React.Component {
   constructor(props) {

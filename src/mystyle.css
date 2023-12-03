@@ -88,6 +88,16 @@ type and size of the screen, see: https://www.w3.org/Style/Examples/007/units.en
     margin-bottom: 10px;
 }
 
+#logIn {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+#submitSignUp {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
 label {
     display: inline;
 }
@@ -103,5 +113,9 @@ label {
 }
 
 #saveAsInput {
+    margin-right: 10px;
+}
+
+#signIn {
     margin-right: 10px;
 }
