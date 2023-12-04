@@ -54,11 +54,12 @@ afterEach(() => {
   container = null;
 });
 
-test("Snapshot of initial page", () => {
-  act(() => {
+test("Snapshot of initial page",async () => {
+  jest.useFakeTimers();
+  await act(async () => {
     root = ReactDOM.createRoot(container);
     root.render(<App appEngine={appEngine} />);
-
+    await jest.runAllTimersAsync();
   });
 
   expect(pretty(container.innerHTML)).toMatchSnapshot();

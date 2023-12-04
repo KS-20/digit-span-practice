@@ -2,7 +2,7 @@
 
 exports[`Snapshot of initial page 1`] = `
 "<div id="mainTerminal">
-  <form name="form_Digits"><input class="form-control" name="input_Digits" type="number" value=""></form><button class="btn btn-primary" id="startPractice" type="button" disabled="">start practice </button>
+  <form name="form_Digits"><input class="form-control" name="input_Digits" type="number" value=""></form><button class="btn btn-primary" id="startPractice" type="button">start practice </button>
   <p>Length of number:</p>
   <form name="form_NumLen"><input class="form-control" name="input_NumLen" type="number" value="2"></form>
   <p>Number of reps:</p>
@@ -13,9 +13,11 @@ exports[`Snapshot of initial page 1`] = `
       <option value="Digit Span Practice Server">Digit Span Practice Server</option>
     </select></form>
   <div id="dropboxLine"><button class="btn btn-primary" id="setUpDropbox" type="button">Set up Dropbox Storage</button>
-    <div>Trying to load performance data from Dropbox</div>
+    <div></div>
   </div>
-  <div id="errorConsole"></div>
+  <div id="errorConsole">
+    <p>Error , no access token is set for Dropbox (was the access code entered correctly?)</p>
+  </div>
   <form><label for="categorySelect">Switch to category: </label><select class="form-select" name="categorySelect" id="categorySelect">
       <option value="None">None</option>
     </select></form>
