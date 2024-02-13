@@ -30,7 +30,7 @@
     "stream-browserify": "^3.0.0",
     "sweetalert": "^2.1.2",
     "util": "^0.12.5",
-    "vite": "^5.0.10",
+    "vite": "^5.0.12",
     "vite-tsconfig-paths": "^4.2.2",
     "web-vitals": "^3.5.0",
     "whatwg-fetch": "^3.6.20",
