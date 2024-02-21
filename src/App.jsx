@@ -58,9 +58,10 @@ class AboutPage extends React.Component {
     return (
       <>
         <p>Digit span is a measure of short term and working memory ,
-          it is bascially the number of digits a person can remember, Reportedly most can remember between 5-9,
+          it is bascially the number of digits a person can remember, Reportedly most can remember between 5-9 digits,
           But a <a href="https://www.science.org/doi/abs/10.1126/science.7375930">study</a> trained someone to recall up to 79 digit,
-          and a <a href="http://help.cambridgebrainsciences.com/en/articles/624895-what-is-the-digit-span-test">world record</a> was set for 3029 digits.</p>
+          Some of the  <a href="http://www.recordholders.org/en/list/memory.html">world records</a> reported are 30 digits in 4 seconds 
+          and <a href="http://help.cambridgebrainsciences.com/en/articles/624895-what-is-the-digit-span-test">3029 digits</a> in one hour.</p>
         <Link to="/">Back to main screen</Link>
       </>
     )
