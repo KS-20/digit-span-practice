@@ -2,7 +2,7 @@ globalThis.IS_REACT_ACT_ENVIRONMENT = true; //see:  https://reactjs.org/blog/202
 
 import 'whatwg-fetch'
 import React from "react";
-import { act } from "react-dom/test-utils";
+import { act } from "react";
 import pretty from "pretty";
 import ReactDOM from 'react-dom/client';
 
