@@ -88,7 +88,14 @@ async function customServerTest(driver) {
     await dropdown.findElement(By.xpath("//option[. = 'Digit Span Practice Server']")).click()
   }
   const USER_NAME_FOR_TEST = process.env.USER_NAME_FOR_TEST;
+  if (!process.env.USER_NAME_FOR_TEST) {
+    throw "environment variable USER_NAME_FOR_TEST is not set, exiting"
+  }
+
   const USER_FOR_TEST_PASSWORD = process.env.USER_FOR_TEST_PASSWORD;
+  if (!process.env.USER_FOR_TEST_PASSWORD) {
+    throw "environment variable USER_FOR_TEST_PASSWORD is not set, exiting"
+  }
 
   await signUp(driver, USER_NAME_FOR_TEST, USER_FOR_TEST_PASSWORD);
 
